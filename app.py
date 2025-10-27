@@ -1,6 +1,6 @@
 # ===============================================================
 # Author: Sanford Janes Witcher III
-# Date: October 26, 2025
+# Date: October 27, 2025
 # File: app.py
 # Description: Main Flask web application for the OBD-II Explorer.
 #              Provides a fast, local AI-assisted interface for
@@ -34,7 +34,7 @@ DB_PATH = os.getenv("DB_PATH", "/app/data/obd2_codes.db")
 MODEL_PATH = "/app/models/tinyllama-1.1b-chat-v1.0.Q5_K_M.gguf"
 CACHE_PATH = os.getenv("CACHE_PATH", "/app/cache")
 CONFIDENCE_NOTE = (
-    "\n\n⚠️ These are AI selected DIY suggestions from a predefined checklist. "
+    "\n\n⚠️ These are AI provided DIY suggestions. "
     "Please verify compatibility with your specific vehicle model "
     "and consult a professional if uncertain."
 )
@@ -157,7 +157,6 @@ FALLBACK_POOL = [
     "Inspect the condition of the vehicle's body and frame for rust or damage",
     "Check the operation of the vehicle's lighting system",
     "Inspect the condition of the vehicle's windshield wipers and washer system",
-    
 ]
 
 # ---------------------------
@@ -248,7 +247,8 @@ def lookup():
             "summary": "Code not found.",
             "description": "No data available.",
             "recommendation": "• Try another OBD II code.",
-            "source": "N/A"
+            "source": "N/A",
+            "ai_last_updated": None
         }), 404
 
     description = row["description"]
@@ -267,8 +267,8 @@ def lookup():
     if needs_ai:
         print(f"⚙️ Generating recommendations for {code}...")
         diy_output = ai_select_from_fallback(description)
-        timestamp = datetime.utcnow().isoformat()
-        cur.execute("UPDATE obd_codes SET diy_checks=?, ai_last_updated=? WHERE code=?", (diy_output, timestamp, code))
+        ai_last_updated = datetime.utcnow().isoformat()
+        cur.execute("UPDATE obd_codes SET diy_checks=?, ai_last_updated=? WHERE code=?", (diy_output, ai_last_updated, code))
         conn.commit()
     else:
         diy_output = diy_checks if CONFIDENCE_NOTE in diy_checks else diy_checks + CONFIDENCE_NOTE
@@ -279,7 +279,8 @@ def lookup():
         "summary": summary,
         "description": description,
         "recommendation": diy_output.strip(),
-        "source": row["source"] or "OBD-Codes.com"
+        "source": row["source"] or "OBD-Codes.com",
+        "ai_last_updated": ai_last_updated or datetime.utcnow().isoformat()
     })
 
 @app.errorhandler(Exception)

@@ -1,0 +1,20 @@
+version: '3.9'
+
+services:
+  obd2_explorer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: obd2_explorer
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./obd2_codes.db:/app/data/obd2_codes.db
+    environment:
+      DB_PATH: "/app/data/obd2_codes.db"
+      CACHE_PATH: "/app/cache"
+      OMP_NUM_THREADS: "4"
+      TOKENIZERS_PARALLELISM: "false"
+      PYTHONUNBUFFERED: "1"
+    restart: unless-stopped
+

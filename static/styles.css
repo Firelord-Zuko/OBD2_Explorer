@@ -114,8 +114,8 @@ body.dark-mode {
   left: 0;
   right: 0;
   height: 60px;
-  background: #ffffffee;
-  border-top: 1px solid #ccc;
+  background: #000000; /* ✅ Now black */
+  border-top: 1px solid #333;
   backdrop-filter: blur(10px);
   display: flex;
   justify-content: space-around;
@@ -126,7 +126,7 @@ body.dark-mode {
 .mobile-toolbar button {
   border: none;
   background: none;
-  color: #0d6efd;
+  color: #ffffff; /* ✅ White text */
   font-weight: 600;
   font-size: 0.9rem;
 }
@@ -136,34 +136,13 @@ body.dark-mode {
 }
 
 .dark-mode .mobile-toolbar {
-  background: #1f1f1fee;
-  border-top: 1px solid #333;
+  background: #000000; /* ✅ Also black in dark mode */
+  border-top: 1px solid #444;
 }
 
 .dark-mode .mobile-toolbar button {
-  color: #66b2ff;
+  color: #ffffff; /* ✅ White in dark mode */
 }
 
-/* ---------- Responsive Breakpoints ---------- */
-@media (max-width: 992px) {
-  .mobile-toolbar {
-    display: flex;
-  }
-  .dark-toggle {
-    display: none;
-  }
-}
-
-@media (max-width: 768px) {
-  h1 {
-    font-size: 1.6rem;
-  }
-
-  .input-group input {
-    font-size: 0.95rem;
-  }
-
-  .input-group button {
-    font-size: 0.9rem;
-  }
-}
+/* ---------- Meta Info Color ---------- */
+body.dark-mode #metaInfo

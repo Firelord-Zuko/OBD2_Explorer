@@ -2,12 +2,13 @@
 
 ### Author
 **Sanford Janes Witcher III**  
-**Date:** October 26, 2025
+**Version:** v1.3.0  
+**Date:** October 27, 2025
 
 ---
 
 ## 📘 Overview
-The **OBD-II Explorer** is an offline, containerized Flask-based web application that uses a **local GGUF LLM (TinyLlama)** via `llama.cpp` for fast, privacy-focused automotive diagnostics. It connects to a local SQLite database of OBD-II codes and provides concise summaries, probable causes, and AI-curated DIY recommendations.
+The **OBD-II Explorer** is an offline, containerized Flask-based web application that uses a **local GGUF LLM (TinyLlama)** via `llama.cpp` for ultra-fast, privacy-focused automotive diagnostics. It connects to a local SQLite database of OBD-II codes and provides concise summaries, descriptions, and AI-curated DIY repair recommendations — even when offline.
 
 ---
 
@@ -16,9 +17,9 @@ The **OBD-II Explorer** is an offline, containerized Flask-based web application
 OBD-II_Explorer/
 ├── app.py                   # Main Flask application logic
 ├── Dockerfile               # Container build instructions
-├── requirements.txt         # Python dependencies
-├── menu.ps1                 # Main PowerShell control dashboard (root)
-├── README.md                # Project documentation (this file)
+├── requirements.txt          # Python dependencies
+├── menu.ps1                 # Interactive PowerShell control dashboard
+├── README.md                # Project documentation
 │
 ├── data/
 │   └── obd2_codes.db        # SQLite database file
@@ -28,7 +29,7 @@ OBD-II_Explorer/
 │
 ├── scripts/
 │   ├── build.ps1            # Cached build process
-│   ├── rebuild.ps1          # Full rebuild (optional no-cache mode)
+│   ├── rebuild.ps1          # Supports cached, rebuild, and clean modes
 │   ├── start_container.ps1  # Container startup script
 │   ├── stop_container.ps1   # Container shutdown script
 │   ├── cleanup.ps1          # Prunes Docker artifacts safely
@@ -36,10 +37,9 @@ OBD-II_Explorer/
 │
 ├── static/
 │   ├── styles.css           # Web interface styling
-│   └── assets/              # Future image or JS assets
 │
 ├── templates/
-│   └── index.html           # Flask HTML front-end
+│   └── index.html           # Web interface (Flask front-end)
 │
 └── .dockerignore            # Excludes unnecessary build artifacts
 ```
@@ -47,26 +47,64 @@ OBD-II_Explorer/
 ---
 
 ## ⚙️ Configuration
+
 ### Environment Variables
 | Variable | Default | Description |
 |-----------|----------|-------------|
 | `DB_PATH` | `/app/data/obd2_codes.db` | Path to SQLite database |
-| `CACHE_PATH` | `/app/cache` | Disk cache location for AI results |
+| `CACHE_PATH` | `/app/cache` | Disk cache for AI results |
+| `MODEL_PATH` | `/app/models/tinyllama-1.1b-chat-v1.0.Q5_K_M.gguf` | Local model path |
+
+---
+
+## 🧠 Release Highlights (v1.3.0)
+
+### 🧩 Backend (app.py)
+- Added `ai_last_updated` field to API JSON response  
+- Ensures timestamp is always returned, falling back to UTC ISO format if missing  
+- Automatic database schema validation at runtime (`ensure_columns()`)  
+- Improved AI refresh logic for DIY recommendations  
+
+---
+
+### 🎨 Frontend (index.html)
+- Introduced **blue gradient background** (`rgb(173,216,255 → rgb(43,151,251)`) for light mode  
+- Added **smooth fade-in animation** on page load  
+- Improved **dark mode contrast** for text visibility  
+- **Description** field now appears directly below the **Summary** section for clarity  
+- Mobile-friendly and fully responsive  
+
+---
+
+### ⚙️ Scripts (PowerShell)
+#### `rebuild.ps1` Logic
+Enhanced with clearly defined build modes:
+| Mode | Behavior |
+|------|-----------|
+| `cached` | Deletes old image before rebuild (keeps container) |
+| `rebuild` | Stops container, rebuilds without deletion, restarts container |
+| `clean` | Deletes both image and container, performs full rebuild |
+
+#### `menu.ps1` Integration
+Refactored to properly invoke rebuild modes:
+```powershell
+1 → & "$PSScriptRoot\rebuild.ps1" -Mode "cached"
+2 → & "$PSScriptRoot\rebuild.ps1" -Mode "rebuild"
+3 → & "$PSScriptRoot\rebuild.ps1" -Mode "clean"
+```
 
 ---
 
 ## 🐳 Docker Setup
+
 ### Build Cached Image
 ```bash
-# From PowerShell Dashboard (menu.ps1)
-> 1  # or run manually
-> docker build -t obd2_explorer .
+docker build -t obd2_explorer .
 ```
 
-### Force Rebuild (No Cache)
+### Rebuild (Cached)
 ```bash
-> 3  # inside menu.ps1, or manually:
-> docker build --no-cache -t obd2_explorer .
+docker compose build --no-cache
 ```
 
 ### Run Container
@@ -77,51 +115,41 @@ docker run -d -p 8888:8888 ^
   -v "${PWD}/data:/app/data" ^
   obd2_explorer
 ```
-Then open **http://localhost:8888** in your browser.
 
-### Prune Old Artifacts
-```bash
-docker system prune -a -f --volumes
-```
+Access the web interface at:  
+🔗 **http://localhost:8888**
 
 ---
 
-## 🧠 AI Configuration
-- **Model:** `tinyllama-1.1b-chat-v1.0.Q5_K_M.gguf`
-- **Backend:** `llama-cpp-python` (runs entirely offline)
-- **Threads:** 4 (`n_threads=4`)
-- **Context Size:** 1024 tokens
-- **Temperature:** 0.1–0.4 depending on module
+## 🧠 AI Model Configuration
+| Parameter | Value |
+|------------|--------|
+| Model | TinyLlama 1.1B Chat (Q5_K_M) |
+| Backend | llama.cpp (via `llama-cpp-python`) |
+| Context | 1024 tokens |
+| Threads | 4 |
+| Temperature | 0.1 |
+| Cache | Disk-based (7-day expiry) |
 
 ---
 
-## ⚡ Performance Tips
-- Run on SSD storage for faster model loading.
-- Keep `models/` and `data/` mounted outside the container.
-- Use `diskcache` to reuse AI results between lookups.
-- Avoid large base images — `python:3.10-slim-bookworm` used for efficiency.
-
----
-
-## 🧮 Scripts Summary
-| Script | Purpose |
-|---------|----------|
-| `menu.ps1` | Interactive management dashboard for build, run, stop, logs, and maintenance |
-| `build.ps1` | Cached build workflow, runs automatically after changes |
-| `rebuild.ps1` | Full rebuild logic, accepts `-NoCache` switch |
-| `start_container.ps1` | Starts container with mounted model and DB |
-| `stop_container.ps1` | Stops and removes running container |
-| `cleanup.ps1` | Safely prunes images, volumes, and cache |
-| `rebuild_clean_database.py` | Rebuilds DB from JSON using Phi-2 summarization |
+## 🧮 Front-End Features
+| Feature | Description |
+|----------|-------------|
+| 🔍 Instant lookups | Code search via lightweight Flask endpoint |
+| 🦾 Summary + Description | Combined human-readable explanation |
+| 🧰 DIY Fixes | 5–8 AI-curated repair suggestions |
+| 🌙 Light/Dark Mode | Persistent user theme setting |
+| 🦭 Recent History | LocalStorage-based lookup history |
+| 🔗 Forum Links | Auto-generated resource references |
 
 ---
 
 ## 🧱 PowerShell Menu (menu.ps1)
-### Options
 | # | Description |
 |---|--------------|
 | 1 | Build (cached) |
-| 2 | Rebuild (cached) |
+| 2 | Rebuild (cached, no deletion) |
 | 3 | Force rebuild (no cache) |
 | 4 | Start container |
 | 5 | Stop container |
@@ -131,48 +159,46 @@ docker system prune -a -f --volumes
 | 9 | View build log |
 | 10 | Export system info |
 | 11 | Monitor Docker system stats |
-| 12 | Backup SQLite database |
-| 13 | Clean old logs |
+| 12 | Backup database |
+| 13 | Clean logs |
 | 0 | Exit dashboard |
-
----
-
-## 🛠️ Common Commands
-```powershell
-# Full prune
-.\scripts\cleanup.ps1
-
-# Force rebuild
-.\scripts\rebuild.ps1 -NoCache
-
-# Start container
-.\scripts\start_container.ps1
-
-# Stop container
-.\scripts\stop_container.ps1
-```
 
 ---
 
 ## 🧰 Troubleshooting
 | Problem | Cause | Fix |
 |----------|--------|-----|
-| `bad marshal data (unknown type code)` | Python’s pip/setuptools upgrade mid-build | Rebuild cleanly using `docker builder prune -a -f` before next build |
-| `param not recognized` | `param()` not at top of PS1 script | Move `param()` to line 1 below header |
-| `Variable reference not valid ':'` | PowerShell misreads colon in path | Use `${Variable}` syntax in `docker run` mounts |
-| `Execution policy disabled` | PowerShell policy blocks scripts | Run `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` |
+| AI timestamp shows “Unknown” | Old app.py missing timestamp field | Update to v1.3.0 |
+| Slow response | Model cold-start | First request warms up TinyLlama |
+| Dark mode text unreadable | Old index.html styles | Replace with latest v1.3.0 file |
+| PowerShell errors | Incorrect rebuild flags | Update menu.ps1 to v1.3.0 version |
 
 ---
 
 ## 💾 Requirements
-- **Windows 10+ or Linux** with Docker Desktop installed
-- **Python 3.10+** (used in container)
-- **PowerShell 7+** for running management scripts
+- **Windows 10+ / Linux** with Docker Desktop  
+- **PowerShell 7+** for management scripts  
+- **Python 3.10+** (inside container)  
+- **8GB+ RAM** recommended for smooth inference  
 
 ---
 
 ## 🧡 Credits
-- Author: **Sanford Janes Witcher III**  
-- Offline AI Model: **TinyLlama 1.1B GGUF**  
-- Base Runtime: **Flask + Gunicorn + llama.cpp**  
-- Database: **SQLite3 (OBD-II Codes)**
+- **Author:** Sanford Janes Witcher III  
+- **Model:** TinyLlama 1.1B Chat (GGUF)  
+- **Backend:** Flask + Gunicorn + llama.cpp  
+- **Database:** SQLite3  
+- **Frontend:** Bootstrap 5 + Vanilla JS  
+
+---
+
+## 🏷️ Version History
+- **v1.3.0** — AI timestamp integration, UI improvements, and script refinements  
+- **v1.2.0** — Offline model integration and caching system  
+- **v1.1.0** — Docker build and PowerShell automation  
+- **v1.0.0** — Initial Flask + HTML application setup  
+
+---
+
+## 🗕️ Last Updated
+**October 27, 2025**

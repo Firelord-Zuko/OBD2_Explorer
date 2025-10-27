@@ -1,6 +1,6 @@
 # ===============================================================
 # Author: Sanford Janes Witcher III
-# Date: October 26, 2025
+# Date: October 27, 2025
 # File: menu.ps1
 # Description: Provides an interactive PowerShell dashboard to manage
 #              Docker container lifecycle, build operations, logs,
@@ -8,7 +8,7 @@
 # ===============================================================
 
 # ===============================================================
-# 🚗  OBD-II Explorer | Control Dashboard v1.0.0
+# 🚗  OBD-II Explorer | Control Dashboard v1.1.0
 # ===============================================================
 
 # --- Always run from the project root ---
@@ -23,7 +23,7 @@ Write-Host " | | | \___ \| | | | | | | | | |_) | | | | |_) | |    \___ \| |_) |"
 Write-Host " | |_| |___) | |_| | | |_| | | |_) | |_| |  _ <| |___  ___) |  __/" -ForegroundColor Cyan
 Write-Host "  \___/|____/|____/   \___/  |____/ \___/|_| \_\_____||____/|_|" -ForegroundColor Cyan
 Write-Host "==================================================================" -ForegroundColor Cyan
-Write-Host "               🚗  OBD-II Explorer Control Dashboard  v1.0.0" -ForegroundColor Yellow
+Write-Host "               🚗  OBD-II Explorer Control Dashboard  v1.1.0" -ForegroundColor Yellow
 Write-Host ""
 
 # -----------------------------------------
@@ -76,41 +76,32 @@ function Remove-Container {
 # Core Actions
 # -----------------------------------------
 function Build-Image {
-    Write-Host "$(Timestamp) 🔧 Building Docker image (with cache)..." -ForegroundColor Cyan
-    docker build --progress=auto -t $ImageName . | Tee-Object -FilePath $BuildLog
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "$(Timestamp) ✅ Build completed successfully." -ForegroundColor Green
-    } else {
-        Write-Host "$(Timestamp) ❌ Build failed. Check build_log.txt" -ForegroundColor Red
-    }
+    Write-Host "$(Timestamp) 🚀 Build (cached) selected — deleting old image first..." -ForegroundColor Green
+    docker rmi -f $ImageName -ErrorAction SilentlyContinue | Out-Null
+    Write-Host "$(Timestamp) ✅ Old image removed." -ForegroundColor DarkGray
+    & $RebuildScript -Mode "cached"
 }
 
 function Rebuild-Image {
-    Write-Host "$(Timestamp) 🔨 Rebuilding Docker image (cached)..." -ForegroundColor Cyan
+    Write-Host "$(Timestamp) 🔨 Rebuild (cached) selected — stop, rebuild, restart (keep image)..." -ForegroundColor Cyan
     & $StopScript
-    Remove-Container
-    docker build --progress=auto -t $ImageName . | Tee-Object -FilePath $BuildLog
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "$(Timestamp) ✅ Rebuild completed successfully." -ForegroundColor Green
-    } else {
-        Write-Host "$(Timestamp) ❌ Rebuild failed. Check build_log.txt" -ForegroundColor Red
-    }
+    & $RebuildScript -Mode "rebuild"
 }
 
 function Force-Rebuild {
-    Write-Host "$(Timestamp) 💥 Performing full rebuild (no cache)..." -ForegroundColor Red
+    Write-Host "$(Timestamp) 💥 Force rebuild (no cache) selected — deleting container and image..." -ForegroundColor Red
     & $StopScript
     Remove-Container
-    & $RebuildScript -NoCache
+    & $RebuildScript -Mode "clean"
 }
 
 function Start-Container {
-    Write-Host "$(Timestamp) ▶️ Starting container using scripts/start_container.ps1..." -ForegroundColor Yellow
+    Write-Host "$(Timestamp) ▶️ Starting container..." -ForegroundColor Yellow
     & $StartScript
 }
 
 function Stop-Container {
-    Write-Host "$(Timestamp) ⏹ Stopping container using scripts/stop_container.ps1..." -ForegroundColor Yellow
+    Write-Host "$(Timestamp) ⏹ Stopping container..." -ForegroundColor Yellow
     & $StopScript
 }
 

@@ -1,88 +1,91 @@
-# ===============================================================
-# Author: Sanford Janes Witcher III
-# Date: October 26, 2025
-# File: rebuild.ps1
-# Description: Performs a full Docker rebuild (optionally no-cache)
-#              for the OBD-II Explorer project, removing old containers
-#              and images, rebuilding from source, and restarting the app.
-# ===============================================================
+<#
+======================================================================
+OBD-II Explorer: Rebuild Script
+Author: Sanford Janes Witcher III
+Date: October 27, 2025
+Version: 1.4
+Description:
+  Performs a Docker rebuild with conditional image and container
+  cleanup behavior based on the -Mode parameter.
+======================================================================
+#>
 
-param (
-    [switch]$NoCache
+param(
+    [ValidateSet("cached", "rebuild", "clean")]
+    [string]$Mode = "cached"
 )
 
-Clear-Host
-$ErrorActionPreference = "Stop"
+# --- Configuration ---
+$containerName = "obd2_explorer"
+$imageName = "obd2_explorer"
 
-# -----------------------------------------
-# Configuration
-# -----------------------------------------
-$ScriptRoot     = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$ProjectRoot    = Resolve-Path "$ScriptRoot\.."
-$ImageName      = "obd2_explorer"
-$ContainerName  = "obd2_explorer"
-$DatabasePath   = "$ProjectRoot\data\obd2_codes.db"
-$ModelsPath     = "$ProjectRoot\models"
-$DockerfilePath = "$ProjectRoot\Dockerfile"
+Write-Host "==============================================================="
+Write-Host "  🚗 OBD-II EXPLORER — REBUILD SCRIPT"
+Write-Host "==============================================================="
+Write-Host "Selected mode: $Mode"
+Write-Host ""
 
-function Write-Log {
-    param ([string]$Message, [string]$Color = "Gray")
-    $timestamp = (Get-Date -Format "HH:mm:ss")
-    Write-Host "[$timestamp] $Message" -ForegroundColor $Color
+# --- Stop running container if active ---
+$running = docker ps -q -f "name=$containerName"
+if ($running) {
+    Write-Host "🛑 Stopping running container..."
+    docker stop $containerName | Out-Null
+    Write-Host "✅ Container stopped."
+} else {
+    Write-Host "ℹ️ No running container detected."
 }
 
-# -----------------------------------------
-# Rebuild Logic
-# -----------------------------------------
-
-
-try {
-    Write-Log "💥 Performing full rebuild (no cache, colorful mode)..." "Red"
-
-    Write-Log "🛑 Stopping container..." "Yellow"
-    docker stop $ContainerName 2>$null | Out-Null
-
-    Write-Log "🧹 Removing container..." "Yellow"
-    docker rm $ContainerName 2>$null | Out-Null
-
-    Write-Log "🧱 Removing old image if exists..." "Yellow"
-    docker rmi $ImageName 2>$null | Out-Null
-
-    if (-not (Test-Path $DockerfilePath)) {
-        Write-Log "❌ Dockerfile not found at: $DockerfilePath" "Red"
-        exit 1
+# --- Conditional cleanup logic ---
+switch ($Mode) {
+    "cached" {
+        Write-Host "🧱 Build (cached): Removing old image before rebuild..."
+        docker rmi -f $imageName -ErrorAction SilentlyContinue | Out-Null
+        Write-Host "✅ Old image removed."
     }
-
-    if (-not (Test-Path $ModelsPath)) {
-        Write-Log "⚠️ Models folder not found: $ModelsPath" "Yellow"
+    "rebuild" {
+        Write-Host "🔁 Rebuild (cached): Keeping current image and container."
+        # 👉 No removal here — preserves everything
     }
-
-    if (-not (Test-Path $DatabasePath)) {
-        Write-Log "⚠️ Database not found, continuing without local mount..." "Yellow"
+    "clean" {
+        Write-Host "🔥 Full clean rebuild: removing container and image..."
+        docker rm -f $containerName -ErrorAction SilentlyContinue | Out-Null
+        docker rmi -f $imageName -ErrorAction SilentlyContinue | Out-Null
+        Write-Host "✅ Container and image removed."
     }
-
-    $buildArgs = if ($NoCache) { "--no-cache" } else { "" }
-
-    Write-Log "🧰 Running full rebuild ($buildArgs)..." "Cyan"
-    Set-Location $ProjectRoot
-    docker build $buildArgs -t $ImageName . | Tee-Object -FilePath "$ScriptRoot\build_log.txt"
-
-    if ($LASTEXITCODE -ne 0) {
-        Write-Log "❌ Rebuild failed. Check logs above." "Red"
-        exit 1
-    }
-
-    Write-Log "🚀 Starting container..." "Green"
-    docker run -d `
-        --name $ContainerName `
-        -p 8888:8888 `
-        -v "${ModelsPath}:/app/models" `
-        -v "${ProjectRoot}\data:/app/data" `
-        $ImageName | Out-Null
-
-    Write-Log "✅ Container started successfully at http://localhost:8888" "Green"
 }
-catch {
-    Write-Log "❌ Error during rebuild: $($_.Exception.Message)" "Red"
+
+# --- Build Phase ---
+if ($Mode -eq "clean") {
+    Write-Host "🔨 Building image (no cache)..."
+    docker build --no-cache -t $imageName . | Tee-Object "$PSScriptRoot\build.log"
+} else {
+    Write-Host "🔨 Building image (cached layers enabled)..."
+    docker build -t $imageName . | Tee-Object "$PSScriptRoot\build.log"
+}
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ Docker build failed. Check build.log for details."
     exit 1
+} else {
+    Write-Host "✅ Build completed successfully."
 }
+
+# --- Restart container ---
+Write-Host ""
+Write-Host "🚀 Starting container..."
+docker run -d -p 8888:8888 `
+    --name $containerName `
+    -v "${PWD}/models:/app/models" `
+    -v "${PWD}/data:/app/data" `
+    $imageName
+
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "✅ Container started successfully."
+} else {
+    Write-Host "❌ Container failed to start. Check logs."
+}
+
+Write-Host ""
+Write-Host "==============================================================="
+Write-Host " Rebuild Completed — Mode: $Mode"
+Write-Host "==============================================================="
