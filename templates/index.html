@@ -3,172 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>OBD-II Explorer</title>
+  <title>OBD-II Explorer v1.3.9</title>
 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-  <!-- Flask static stylesheet -->
+  <!-- Custom stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
-
-  <style>
-    body.light-mode {
-      background: linear-gradient(135deg, rgb(173, 216, 255), rgb(43, 151, 251));
-      color: #212529;
-      transition: background 1.2s ease-in-out;
-    }
-    body.dark-mode {
-      background-color: #121212;
-      color: #e5e5e5;
-      transition: background-color 0.6s ease-in-out;
-    }
-
-    .dark-toggle {
-      position: fixed; top: 15px; right: 15px; z-index: 999;
-    }
-
-    .content {
-      background: rgba(255, 255, 255, 0.93);
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-      margin-bottom: 5rem;
-      transition: background-color 0.4s ease, color 0.4s ease;
-      opacity: 0;
-      transform: translateY(10px);
-      animation: fadeInUp 0.8s ease forwards;
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    body.dark-mode .content {
-      background: rgba(30, 30, 30, 0.95);
-    }
-
-    .instruction-text {
-      color: #000;
-      transition: color 0.3s ease;
-    }
-    body.dark-mode .instruction-text { color: #fff; }
-
-    .history-pill {
-      display: inline-block;
-      background: #e9ecef;
-      color: #212529;
-      padding: 0.45rem 0.9rem;
-      border-radius: 20px;
-      margin: 0.25rem 0;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.2s;
-    }
-    .history-pill:hover { background: #d1d5db; }
-    body.dark-mode .history-pill { background: #333; color: #eee; }
-    body.dark-mode .history-pill:hover { background: #444; }
-
-    #historyContainer {
-      display: flex;
-      flex-direction: row;
-      overflow-x: auto;
-      flex-wrap: nowrap;
-      gap: 0.5rem;
-      padding-bottom: 0.5rem;
-      scrollbar-width: thin;
-    }
-
-    .spinner-border { width: 2rem; height: 2rem; margin: 1rem auto; display: none; }
-
-    .forum-links a {
-      display: inline-block;
-      margin: 0.2rem 0.4rem;
-      text-decoration: none;
-    }
-    .forum-links a:hover { text-decoration: underline; }
-
-    .collapse-section {
-      cursor: pointer;
-      color: #0d6efd;
-      font-weight: 500;
-      user-select: none;
-      transition: color 0.3s;
-    }
-    .collapse-section:hover { color: #0a58ca; }
-
-    .mobile-toolbar {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: #000; /* ✅ Changed to black */
-      border-top: 1px solid #ccc;
-      display: flex; justify-content: space-around; align-items: center;
-      padding: 0.6rem 0; z-index: 9999;
-      backdrop-filter: blur(8px);
-    }
-    .mobile-toolbar button {
-      flex: 1; border: none; background: none;
-      font-size: 1.1rem; font-weight: 500; color: #fff; /* ✅ Text now white */
-    }
-    .mobile-toolbar button:active { transform: scale(0.96); }
-    body.dark-mode .mobile-toolbar { background: #000; border-color: #444; } /* ✅ Dark mode black */
-    body.dark-mode .mobile-toolbar button { color: #fff; } /* ✅ White text in dark mode */
-
-    .timestamp-fresh { color: #28a745; }
-    .timestamp-old { color: #6c757d; }
-
-    /* ✅ Make metaInfo white in dark mode */
-    body.dark-mode #metaInfo {
-      color: #ffffff !important;
-    }
-
-    @media (max-width: 768px) {
-      .content { padding: 1.2rem; }
-      .dark-toggle { top: auto; bottom: 4.5rem; right: 1rem; }
-    }
-  </style>
 </head>
 
 <body class="light-mode">
-  <button class="btn btn-outline-secondary dark-toggle" id="toggleDark">🌙 Dark Mode</button>
 
   <div class="container my-4">
     <div class="content">
-      <h1 class="text-center mb-3">🚗 OBD-II Explorer</h1>
+      <h1 class="text-center mb-3">🚗 OBD-II Explorer v1.3.9</h1>
       <p class="text-center instruction-text">
         Enter an OBD-II code (P0000 to P0812) to view details, DIY fixes, and helpful resources.<br>
-        Note, not all PXXXX codes are used and may be reserved for specific auto manufacturers.
+        Codes missing a “P” or leading zeros will be automatically corrected.
       </p>
 
-      <div class="input-group mb-3">
-        <input type="text" id="codeInput" inputmode="text" pattern="[A-Za-z0-9]*"
-               class="form-control" placeholder="Enter code (P0001–P0998)" autofocus />
-        <button class="btn btn-primary" id="lookupBtn">Lookup</button>
+      <!-- ✅ Centered input -->
+      <div class="d-flex justify-content-center mb-3">
+        <div class="input-wrapper">
+          <input type="text" id="codeInput" inputmode="text" pattern="[A-Za-z0-9]*"
+                 class="form-control text-center" placeholder="Enter code (P0001–P0812)" autofocus />
+        </div>
+      </div>
+
+      <!-- ✅ Toolbar -->
+      <div class="mobile-toolbar">
+        <button id="toolbarLookup">🔍 Lookup</button>
+        <button id="toolbarClear">🗑️ Clear</button>
+        <button id="toolbarDark">🌙 Dark</button>
       </div>
 
       <div class="text-center">
-        <div class="spinner-border text-primary" id="loadingSpinner" role="status">
+        <div class="spinner-border text-primary" id="loadingSpinner" role="status" style="display:none;">
           <span class="visually-hidden">Loading...</span>
         </div>
       </div>
 
       <div id="result" style="display: none;">
-        <h5 id="codeTitle"></h5>
+        <h5 id="codeTitle" class="mt-3"></h5>
 
-        <h6 class="mt-3">🧾 Summary:</h6>
-        <p id="summary" class="text-muted"></p>
+        <h6 class="mt-3 section-icon">📜 Summary:</h6>
+        <p id="summary" class="summary-text"></p>
 
-        <h6 class="mt-3">📘 Description:</h6>
-        <p id="description" class="text-secondary"></p>
+        <h6 class="mt-3 section-icon">📘 Description:</h6>
+        <p id="description"></p>
 
-        <h6 class="mt-3">🧰 DIY Recommendations:</h6>
+        <h6 class="mt-3 section-icon">🧰 DIY Recommendations:</h6>
         <div id="recommendation"></div>
         <p class="collapse-section" id="toggleTips" style="display: none;">View More Tips ▼</p>
 
-        <h6 class="mt-3">🔗 Forums & Resources:</h6>
+        <h6 class="mt-3 section-icon">🔗 Forums & Resources:</h6>
         <div class="forum-links" id="forums"></div>
 
         <div id="recentHistorySection" class="mt-4">
-          <h6 class="collapse-section" id="toggleHistory">Recent Lookups ▼</h6>
+          <h6 class="collapse-section section-icon" id="toggleHistory">🕘 Recent Lookups ▼</h6>
           <div id="historyContainer" style="display: none;"></div>
         </div>
 
@@ -177,35 +69,47 @@
     </div>
   </div>
 
-  <div class="mobile-toolbar">
-    <button id="toolbarLookup">🔍 Lookup</button>
-    <button id="toolbarClear">🗑️ Clear History</button>
-    <button id="toolbarDark">🌙 Go Dark</button>
-  </div>
+  <footer class="text-center mt-4 mb-2 small text-muted">
+    <p>v1.3.9 | Sanford Janes Witcher III | Offline AI Diagnostics</p>
+  </footer>
 
   <script>
     const body = document.body;
-    const toggleButton = document.getElementById("toggleDark");
-    const lookupBtn = document.getElementById("lookupBtn");
     const spinner = document.getElementById("loadingSpinner");
     const historyContainer = document.getElementById("historyContainer");
     const toggleHistory = document.getElementById("toggleHistory");
     const toolbarDark = document.getElementById("toolbarDark");
     const toolbarClear = document.getElementById("toolbarClear");
     const toolbarLookup = document.getElementById("toolbarLookup");
+    const codeInput = document.getElementById("codeInput");
 
+    /* ---------- Utility: Normalize OBD-II Input ---------- */
+    function normalizeCodeInput(rawValue) {
+      let code = rawValue.trim().toUpperCase();
+      if (/^P\d{4}$/.test(code)) return code;
+      code = code.replace(/^P/i, "");
+      code = code.replace(/\D/g, "");
+      code = code.padStart(4, "0").slice(-4);
+      return "P" + code;
+    }
+
+    function suggestCorrection(inputValue) {
+      const padded = normalizeCodeInput(inputValue);
+      alert(`Invalid format. Did you mean ${padded}?`);
+    }
+
+    /* ---------- Theme Toggle ---------- */
     function toggleTheme() {
       const dark = body.classList.contains("light-mode");
       body.classList.toggle("dark-mode", dark);
       body.classList.toggle("light-mode", !dark);
-      toggleButton.textContent = dark ? "☀️ Light Mode" : "🌙 Dark Mode";
       toolbarDark.textContent = dark ? "☀️ Light" : "🌙 Dark";
       localStorage.setItem("theme", dark ? "dark" : "light");
     }
     if (localStorage.getItem("theme") === "dark") toggleTheme();
-    toggleButton.addEventListener("click", toggleTheme);
     toolbarDark.addEventListener("click", toggleTheme);
 
+    /* ---------- Format & Display ---------- */
     function formatRecommendations(text) {
       if (!text) return "<p>No recommendation available.</p>";
       const lines = text.split(/\n|•|-|\d\.\s/).map(l => l.trim()).filter(Boolean);
@@ -249,7 +153,7 @@
       historyContainer.innerHTML = pills;
       document.querySelectorAll(".history-pill").forEach(pill => {
         pill.onclick = () => {
-          document.getElementById("codeInput").value = pill.textContent;
+          codeInput.value = pill.textContent;
           performLookup();
         };
       });
@@ -258,72 +162,122 @@
     toggleHistory.addEventListener("click", () => {
       const hidden = historyContainer.style.display === "none";
       historyContainer.style.display = hidden ? "flex" : "none";
-      toggleHistory.textContent = hidden ? "Recent Lookups ▲" : "Recent Lookups ▼";
+      toggleHistory.textContent = hidden ? "🕘 Recent Lookups ▲" : "🕘 Recent Lookups ▼";
     });
 
+    /* ---------- Local Cache Functions ---------- */
+    function getCache() {
+      return JSON.parse(localStorage.getItem("lookupCache") || "{}");
+    }
+
+    function setCache(code, data) {
+      const cache = getCache();
+      cache[code] = { data, timestamp: Date.now() };
+      localStorage.setItem("lookupCache", JSON.stringify(cache));
+    }
+
+    function getCachedResult(code) {
+      const cache = getCache();
+      return cache[code] ? cache[code].data : null;
+    }
+
+    /* ---------- Main Lookup ---------- */
     async function performLookup() {
-      const code = document.getElementById("codeInput").value.trim().toUpperCase();
-      if (!code) return alert("Please enter a valid OBD-II code.");
-      lookupBtn.disabled = true;
+      const normalizedCode = normalizeCodeInput(codeInput.value);
+      codeInput.value = normalizedCode;
+
+      if (!/^P\d{4}$/.test(normalizedCode)) {
+        suggestCorrection(codeInput.value);
+        return;
+      }
+
+      // ⚡ Try cache first
+      const cached = getCachedResult(normalizedCode);
+      if (cached) {
+        console.log("Loaded from cache:", normalizedCode);
+        renderResult(normalizedCode, cached, true);
+        return;
+      }
+
       spinner.style.display = "inline-block";
       document.getElementById("result").style.display = "none";
+      toolbarLookup.disabled = true;
+      setTimeout(() => toolbarLookup.disabled = false, 800);
 
       try {
         const res = await fetch("/lookup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code }),
+          body: JSON.stringify({ code: normalizedCode }),
         });
         const data = await res.json();
-        document.getElementById("result").style.display = "block";
-        document.getElementById("codeTitle").textContent = `Code: ${data.code}`;
-        document.getElementById("description").textContent = data.description || "No description.";
-        document.getElementById("summary").textContent = data.summary || "No summary.";
-        document.getElementById("recommendation").innerHTML = formatRecommendations(data.recommendation);
-        setupTipsToggle(document.getElementById("recommendation"), document.getElementById("toggleTips"));
-        renderForums(code);
 
-        // ✅ Save lookup history
-        let history = JSON.parse(localStorage.getItem("lookupHistory") || "[]");
-        if (!history.includes(code)) {
-          history.unshift(code);
-          if (history.length > 10) history = history.slice(0, 10);
-          localStorage.setItem("lookupHistory", JSON.stringify(history));
-        }
-
-        renderHistory();
-
-        let updated = "Unknown";
-        let timestampClass = "timestamp-old";
-        if (data.ai_last_updated) {
-          const updatedDate = new Date(data.ai_last_updated);
-          const now = new Date();
-          const diffDays = (now - updatedDate) / (1000 * 60 * 60 * 24);
-          updated = updatedDate.toLocaleString();
-          timestampClass = diffDays <= 30 ? "timestamp-fresh" : "timestamp-old";
-        }
-
-        document.getElementById("metaInfo").innerHTML =
-          `Source: ${data.source || "N/A"} | <span class="${timestampClass}">AI Last Updated: ${updated}</span>`;
-
+        renderResult(normalizedCode, data, false);
+        setCache(normalizedCode, data); // ✅ cache new result
       } catch (err) {
         alert("Lookup failed. Try again later.");
         console.error(err);
       } finally {
         spinner.style.display = "none";
-        lookupBtn.disabled = false;
+        codeInput.focus();
       }
     }
 
-    document.getElementById("lookupBtn").addEventListener("click", performLookup);
-    toolbarLookup.addEventListener("click", performLookup);
-    toolbarClear.addEventListener("click", () => {
-      localStorage.removeItem("lookupHistory");
+    /* ---------- Render Result Helper ---------- */
+    function renderResult(code, data, fromCache) {
+      document.getElementById("result").style.display = "block";
+      document.getElementById("codeTitle").textContent = `Code: ${data.code}`;
+      document.getElementById("description").textContent = data.description || "No description.";
+      document.getElementById("summary").textContent = data.summary || "No summary.";
+      document.getElementById("recommendation").innerHTML = formatRecommendations(data.recommendation);
+      setupTipsToggle(document.getElementById("recommendation"), document.getElementById("toggleTips"));
+      renderForums(code);
+
+      let history = JSON.parse(localStorage.getItem("lookupHistory") || "[]");
+      if (!history.includes(code)) {
+        history.unshift(code);
+        if (history.length > 10) history = history.slice(0, 10);
+        localStorage.setItem("lookupHistory", JSON.stringify(history));
+      }
       renderHistory();
-    });
-    document.getElementById("codeInput").addEventListener("keypress", e => {
+
+      let updated = "Unknown";
+      let timestampClass = "timestamp-old";
+      if (data.ai_last_updated) {
+        const updatedDate = new Date(data.ai_last_updated);
+        const now = new Date();
+        const diffDays = (now - updatedDate) / (1000 * 60 * 60 * 24);
+        updated = updatedDate.toLocaleString();
+        timestampClass = diffDays <= 30 ? "timestamp-fresh" : "timestamp-old";
+      }
+
+      const cacheInfo = fromCache ? "⚡ Loaded from Local Cache" : "🌐 Fresh from Source";
+      document.getElementById("metaInfo").innerHTML =
+        `${cacheInfo}<br>Source: ${data.source || "N/A"} | ` +
+        `<span class="${timestampClass}">AI Last Updated: ${updated}</span>` +
+        `<br><small>Last Checked: ${new Date().toLocaleString()}</small>`;
+    }
+
+    toolbarLookup.addEventListener("click", performLookup);
+    codeInput.addEventListener("keypress", e => {
       if (e.key === "Enter") performLookup();
     });
+
+    toolbarClear.addEventListener("click", () => {
+      localStorage.removeItem("lookupHistory");
+      localStorage.removeItem("lookupCache");
+      historyContainer.innerHTML = "<p class='text-muted small'>No recent lookups.</p>";
+      codeInput.value = "";
+      toolbarClear.disabled = true;
+      toolbarClear.style.opacity = "0.6";
+      setTimeout(() => {
+        toolbarClear.disabled = false;
+        toolbarClear.style.opacity = "1";
+      }, 1000);
+    });
+
+    codeInput.addEventListener("focus", e => e.target.select());
+    spinner.style.display = "none";
     renderHistory();
   </script>
 </body>

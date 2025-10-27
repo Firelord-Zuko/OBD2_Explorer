@@ -1,47 +1,50 @@
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
+![Flask](https://img.shields.io/badge/Framework-Flask-green)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Docker](https://img.shields.io/badge/Docker-Ready-blue)
+![LLM](https://img.shields.io/badge/AI_Model-TinyLlama_1.1B-orange)
+![Status](https://img.shields.io/badge/Status-Stable-success)
+
 # 🚗 OBD-II Explorer Project
 
 ### Author
 **Sanford Janes Witcher III**  
-**Version:** v1.3.0  
-**Date:** October 27, 2025
+**Version:** v1.3.9  
+**Date:** October 27, 2025  
 
 ---
 
 ## 📘 Overview
-The **OBD-II Explorer** is an offline, containerized Flask-based web application that uses a **local GGUF LLM (TinyLlama)** via `llama.cpp` for ultra-fast, privacy-focused automotive diagnostics. It connects to a local SQLite database of OBD-II codes and provides concise summaries, descriptions, and AI-curated DIY repair recommendations — even when offline.
+**OBD-II Explorer** is a self-hosted, offline-capable AI diagnostic web application that decodes automotive error codes using a local LLM (TinyLlama or Mistral).  
+It’s optimized for **speed, privacy, and offline operation**, providing instant summaries, technical explanations, and DIY repair guidance through a lightweight **Flask** interface.
 
 ---
 
 ## 🧩 Project Structure
 ```
 OBD-II_Explorer/
-├── app.py                   # Main Flask application logic
-├── Dockerfile               # Container build instructions
-├── requirements.txt          # Python dependencies
-├── menu.ps1                 # Interactive PowerShell control dashboard
-├── README.md                # Project documentation
+├── app.py                        # Main Flask application logic
+├── Dockerfile                    # Container build instructions
+├── requirements.txt              # Python dependencies
+├── README.md                     # Project documentation
 │
 ├── data/
-│   └── obd2_codes.db        # SQLite database file
+│   └── obd2_codes.db             # SQLite database of OBD-II codes
 │
 ├── models/
-│   └── tinyllama-1.1b-chat-v1.0.Q5_K_M.gguf  # Offline model file
-│
-├── scripts/
-│   ├── build.ps1            # Cached build process
-│   ├── rebuild.ps1          # Supports cached, rebuild, and clean modes
-│   ├── start_container.ps1  # Container startup script
-│   ├── stop_container.ps1   # Container shutdown script
-│   ├── cleanup.ps1          # Prunes Docker artifacts safely
-│   └── rebuild_clean_database.py  # Rebuilds and cleans SQLite DB
+│   └── tinyllama-1.1b-chat-v1.0.Q5_K_M.gguf   # Local lightweight model
 │
 ├── static/
-│   ├── styles.css           # Web interface styling
+│   ├── styles.css                # Application styles
 │
 ├── templates/
-│   └── index.html           # Web interface (Flask front-end)
+│   └── index.html                # Web front-end
 │
-└── .dockerignore            # Excludes unnecessary build artifacts
+└── scripts/
+    ├── build.ps1                 # Docker build script
+    ├── rebuild.ps1               # Rebuild + clean options
+    ├── start_container.ps1       # Start container
+    └── stop_container.ps1        # Stop container
 ```
 
 ---
@@ -52,134 +55,78 @@ OBD-II_Explorer/
 | Variable | Default | Description |
 |-----------|----------|-------------|
 | `DB_PATH` | `/app/data/obd2_codes.db` | Path to SQLite database |
+| `MODEL_PATH` | `/app/models/tinyllama-1.1b-chat-v1.0.Q5_K_M.gguf` | Path to local model |
 | `CACHE_PATH` | `/app/cache` | Disk cache for AI results |
-| `MODEL_PATH` | `/app/models/tinyllama-1.1b-chat-v1.0.Q5_K_M.gguf` | Local model path |
 
 ---
 
-## 🧠 Release Highlights (v1.3.0)
+## 🧠 Release Highlights (v1.3.9)
 
-### 🧩 Backend (app.py)
-- Added `ai_last_updated` field to API JSON response  
-- Ensures timestamp is always returned, falling back to UTC ISO format if missing  
-- Automatic database schema validation at runtime (`ensure_columns()`)  
-- Improved AI refresh logic for DIY recommendations  
-
----
-
-### 🎨 Frontend (index.html)
-- Introduced **blue gradient background** (`rgb(173,216,255 → rgb(43,151,251)`) for light mode  
-- Added **smooth fade-in animation** on page load  
-- Improved **dark mode contrast** for text visibility  
-- **Description** field now appears directly below the **Summary** section for clarity  
-- Mobile-friendly and fully responsive  
+### 🧩 Backend (Flask)
+- Maintains database integrity and ensures schema validation  
+- Returns AI last-updated timestamps and code source  
+- Supports local model inference (TinyLlama / Mistral via llama.cpp)
 
 ---
 
-### ⚙️ Scripts (PowerShell)
-#### `rebuild.ps1` Logic
-Enhanced with clearly defined build modes:
-| Mode | Behavior |
-|------|-----------|
-| `cached` | Deletes old image before rebuild (keeps container) |
-| `rebuild` | Stops container, rebuilds without deletion, restarts container |
-| `clean` | Deletes both image and container, performs full rebuild |
-
-#### `menu.ps1` Integration
-Refactored to properly invoke rebuild modes:
-```powershell
-1 → & "$PSScriptRoot\rebuild.ps1" -Mode "cached"
-2 → & "$PSScriptRoot\rebuild.ps1" -Mode "rebuild"
-3 → & "$PSScriptRoot\rebuild.ps1" -Mode "clean"
-```
+### 🎨 Front-End (index.html + styles.css)
+| Feature | Description |
+|----------|-------------|
+| 🔍 **Code Normalization** | Automatically fixes user input (e.g., `23 → P0023`) |
+| 💡 **Smart Suggestions** | “Did you mean P0123?” prompt for invalid input |
+| ⏱️ **Timestamp Tracking** | Displays “Last Checked” date/time for each lookup |
+| 🧭 **Local Quick Cache** | Instant results on repeat lookups — even offline |
+| 🌙 **Light/Dark Mode** | Smooth transitions, persistent preference |
+| 🧰 **DIY Recommendations** | Expanded multi-line list with collapsible tips |
+| 🗑️ **Smart Clear Button** | Clears history + input field with fade animation |
+| ⚡ **Offline Resilience** | Cached data served instantly if backend unreachable |
+| 📜 **Icons Restored** | Visual section markers (📜, 📘, 🧰, 🔗, 🕘) |
+| 🧠 **Auto-Focus & Select** | Focuses input box after lookup for fast re-entry |
+| 📱 **Responsive Design** | Mobile-first layout with compact toolbar |
 
 ---
 
-## 🐳 Docker Setup
+## 🧮 Local Cache Logic
+OBD-II Explorer now includes an intelligent caching layer:
 
-### Build Cached Image
+| Function | Behavior |
+|-----------|-----------|
+| **setCache()** | Stores code result JSON in `localStorage` |
+| **getCache()** | Loads cached results if available |
+| **fromCache** | Displays “⚡ Loaded from Local Cache” for reused codes |
+| **clear** | Removes cache + history from localStorage |
+
+This reduces lookup latency to 0ms for previously searched codes and allows fully offline use once results have been cached.
+
+---
+
+## 🧱 Docker Setup
+
+### Build Image
 ```bash
 docker build -t obd2_explorer .
 ```
 
-### Rebuild (Cached)
-```bash
-docker compose build --no-cache
-```
-
 ### Run Container
 ```bash
-docker run -d -p 8888:8888 ^
-  --name obd2_explorer ^
-  -v "${PWD}/models:/app/models" ^
-  -v "${PWD}/data:/app/data" ^
+docker run -d -p 8888:8888 \
+  --name obd2_explorer \
+  -v "${PWD}/models:/app/models" \
+  -v "${PWD}/data:/app/data" \
   obd2_explorer
 ```
 
-Access the web interface at:  
+Access the web app at:  
 🔗 **http://localhost:8888**
 
 ---
 
-## 🧠 AI Model Configuration
-| Parameter | Value |
-|------------|--------|
-| Model | TinyLlama 1.1B Chat (Q5_K_M) |
-| Backend | llama.cpp (via `llama-cpp-python`) |
-| Context | 1024 tokens |
-| Threads | 4 |
-| Temperature | 0.1 |
-| Cache | Disk-based (7-day expiry) |
-
----
-
-## 🧮 Front-End Features
-| Feature | Description |
-|----------|-------------|
-| 🔍 Instant lookups | Code search via lightweight Flask endpoint |
-| 🦾 Summary + Description | Combined human-readable explanation |
-| 🧰 DIY Fixes | 5–8 AI-curated repair suggestions |
-| 🌙 Light/Dark Mode | Persistent user theme setting |
-| 🦭 Recent History | LocalStorage-based lookup history |
-| 🔗 Forum Links | Auto-generated resource references |
-
----
-
-## 🧱 PowerShell Menu (menu.ps1)
-| # | Description |
-|---|--------------|
-| 1 | Build (cached) |
-| 2 | Rebuild (cached, no deletion) |
-| 3 | Force rebuild (no cache) |
-| 4 | Start container |
-| 5 | Stop container |
-| 6 | Remove container |
-| 7 | View container logs (live) |
-| 8 | View container logs (snapshot) |
-| 9 | View build log |
-| 10 | Export system info |
-| 11 | Monitor Docker system stats |
-| 12 | Backup database |
-| 13 | Clean logs |
-| 0 | Exit dashboard |
-
----
-
-## 🧰 Troubleshooting
-| Problem | Cause | Fix |
-|----------|--------|-----|
-| AI timestamp shows “Unknown” | Old app.py missing timestamp field | Update to v1.3.0 |
-| Slow response | Model cold-start | First request warms up TinyLlama |
-| Dark mode text unreadable | Old index.html styles | Replace with latest v1.3.0 file |
-| PowerShell errors | Incorrect rebuild flags | Update menu.ps1 to v1.3.0 version |
-
----
-
 ## 💾 Requirements
-- **Windows 10+ / Linux** with Docker Desktop  
-- **PowerShell 7+** for management scripts  
-- **Python 3.10+** (inside container)  
-- **8GB+ RAM** recommended for smooth inference  
+- **Python 3.10+**
+- **Flask**
+- **Docker Desktop** (Windows/Linux)
+- **8GB RAM minimum** for LLM inference  
+- **Browser with localStorage support**
 
 ---
 
@@ -192,11 +139,24 @@ Access the web interface at:
 
 ---
 
-## 🏷️ Version History
-- **v1.3.0** — AI timestamp integration, UI improvements, and script refinements  
-- **v1.2.0** — Offline model integration and caching system  
-- **v1.1.0** — Docker build and PowerShell automation  
-- **v1.0.0** — Initial Flask + HTML application setup  
+## 🧭 Version History
+| Version | Date | Notes |
+|----------|------|-------|
+| **v1.3.9** | Oct 28, 2025 | Local Quick Cache, offline-ready, smart validation |
+| **v1.3.8** | Oct 28, 2025 | Added timestamps, improved dark mode visibility |
+| **v1.3.7** | Oct 27, 2025 | Tier 1 UX: narrower input, smoother transitions |
+| **v1.3.6** | Oct 27, 2025 | Fixed regex bug + added Clear button UX fade |
+| **v1.3.5** | Oct 27, 2025 | Restored icons, input clear logic, dark toggle fix |
+| **v1.3.4** | Oct 27, 2025 | Spinner & gradient fix |
+| **v1.3.3** | Oct 27, 2025 | Toolbar repositioned + dark toggle cleanup |
+| **v1.3.2** | Oct 26, 2025 | Style refinement, centered toolbar |
+| **v1.3.1** | Oct 25, 2025 | Input normalization logic added |
+| **v1.3.0** | Oct 24, 2025 | Base stable release |
+
+---
+
+## 🏷️ License
+This project is licensed under the **MIT License** — free for personal and commercial use with attribution.
 
 ---
 

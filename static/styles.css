@@ -1,148 +1,120 @@
-/* ---------- Base Theme ---------- */
 body {
   font-family: "Segoe UI", Tahoma, sans-serif;
-  transition: background-color 0.3s, color 0.3s;
   margin-bottom: 80px;
+  transition: background 0.8s ease, color 0.8s ease;
 }
 
 body.light-mode {
-  background-color: #f8f9fa;
+  background: linear-gradient(135deg, rgb(173, 216, 255), rgb(43, 151, 251));
   color: #212529;
 }
 
 body.dark-mode {
   background-color: #121212;
-  color: #e0e0e0;
+  color: #e5e5e5;
 }
 
-/* ---------- Global Layout ---------- */
-.container-fluid {
-  margin-top: 70px;
-  max-width: 1200px;
+/* ---------- Card ---------- */
+.content {
+  background: rgba(255, 255, 255, 0.93);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  padding: 2rem;
+  margin-bottom: 5rem;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-/* ---------- Panels ---------- */
-.content,
-.history-box {
-  background: var(--bs-body-bg);
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  margin-bottom: 20px;
+body.dark-mode .content {
+  background: rgba(30, 30, 30, 0.95);
 }
 
-.dark-mode .content,
-.dark-mode .history-box {
-  background-color: #1e1e1e;
-  box-shadow: 0 2px 6px rgba(255, 255, 255, 0.05);
+/* ---------- Narrow Input ---------- */
+.input-wrapper {
+  width: 50%;
+  min-width: 200px;
+  max-width: 360px;
 }
 
-/* ---------- Buttons & Links ---------- */
-.toggle-btn,
-.tips-toggle,
-.collapse-btn {
-  margin-top: 10px;
-  cursor: pointer;
-  color: #0d6efd;
-  font-weight: 500;
+.form-control {
+  border-radius: 0.5rem;
+  text-align: center;
 }
 
-.dark-mode .toggle-btn,
-.dark-mode .tips-toggle,
-.dark-mode .collapse-btn {
-  color: #66b2ff;
-}
-
-.clear-btn {
-  background: none;
-  border: none;
-  color: #dc3545;
-  cursor: pointer;
-  font-weight: 500;
-  padding: 0;
-  font-size: 0.9rem;
-}
-
-.clear-btn:hover {
-  text-decoration: underline;
-}
-
-/* ---------- History Section ---------- */
-.history-item {
-  cursor: pointer;
-  color: #0d6efd;
-  margin-bottom: 4px;
-}
-
-.dark-mode .history-item {
-  color: #66b2ff;
-}
-
-#source a {
-  color: #0d6efd;
-  text-decoration: none;
-}
-
-.dark-mode #source a {
-  color: #66b2ff;
-}
-
-#source a:hover {
-  text-decoration: underline;
-}
-
-/* ---------- Fixed Dark Toggle ---------- */
-.dark-toggle {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1000;
-}
-
-/* ---------- Loading Text ---------- */
-.loading {
-  display: none;
-  color: #007bff;
-  font-style: italic;
-}
-
-/* ---------- Mobile Toolbar ---------- */
+/* ---------- Toolbar ---------- */
 .mobile-toolbar {
-  display: none;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: #000000; /* ✅ Now black */
-  border-top: 1px solid #333;
-  backdrop-filter: blur(10px);
+  margin: 1rem auto 0;
+  max-width: 640px;
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
-  z-index: 1050;
+  gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
 .mobile-toolbar button {
-  border: none;
-  background: none;
-  color: #ffffff; /* ✅ White text */
+  border: 1px solid rgba(0,0,0,0.25);
+  background: #f8f9fa;
+  color: #212529;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 10px;
+  min-width: 96px;
+  transition: transform 0.06s ease, background-color 0.2s ease, opacity 0.3s ease;
 }
 
-.mobile-toolbar button:active {
-  opacity: 0.6;
+.mobile-toolbar button:active { transform: scale(0.98); }
+
+body.dark-mode .mobile-toolbar button {
+  background: #1f1f1f;
+  color: #fff;
+  border-color: #444;
 }
 
-.dark-mode .mobile-toolbar {
-  background: #000000; /* ✅ Also black in dark mode */
-  border-top: 1px solid #444;
+/* ---------- Section Icons ---------- */
+.section-icon {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
 }
 
-.dark-mode .mobile-toolbar button {
-  color: #ffffff; /* ✅ White in dark mode */
+/* ---------- Summary Text Fix ---------- */
+.summary-text {
+  color: #212529;
+}
+body.dark-mode .summary-text {
+  color: #d9e9ff; /* lighter for visibility */
 }
 
-/* ---------- Meta Info Color ---------- */
-body.dark-mode #metaInfo
+/* ---------- History Pills ---------- */
+.history-pill {
+  background: #e9ecef;
+  color: #212529;
+  padding: 0.45rem 0.9rem;
+  border-radius: 20px;
+  margin: 0.25rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.history-pill:hover { background: #d1d5db; }
+
+body.dark-mode .history-pill { background: #333; color: #eee; }
+body.dark-mode .history-pill:hover { background: #444; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 576px) {
+  .content { padding: 1.25rem; }
+  .input-wrapper { width: 75%; }
+}
+
+/* ---------- Footer ---------- */
+footer {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+body.dark-mode footer { color: #aaa; }
