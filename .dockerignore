@@ -1,0 +1,31 @@
+# ===============================================================
+# Author: Sanford Janes Witcher III
+# Date: October 26, 2025
+# File: .dockerignore
+# Description: Specifies which files and folders should be excluded
+#              from the Docker build context to reduce image size
+#              and speed up build times.
+# ===============================================================
+
+# Ignore Python cache and build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db-journal
+
+# Ignore system or IDE files
+.vscode/
+.idea/
+.git/
+.gitignore
+.env
+
+# Ignore temporary logs or outputs
+logs/
+*.log
+*.tmp
+
+# DO NOT ignore data folder — it's needed inside the container
+# data/
+# scripts/ (keep this included so rebuild scripts can access Docker)

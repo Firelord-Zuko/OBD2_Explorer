@@ -1,0 +1,18 @@
+# ===============================================================
+# Author: Sanford Janes Witcher III
+# Date: October 26, 2025
+# File: requirements.txt
+# Description: Python dependencies for the OBD-II Explorer project.
+#              Includes Flask web framework, llama.cpp bindings,
+#              caching, and server components for offline inference.
+# ===============================================================
+
+flask==3.0.3
+gunicorn==21.2.0
+llama-cpp-python==0.2.73      # <- last stable before CMake 4 builds
+diskcache==5.6.3
+jinja2==3.1.6
+requests==2.32.3
+tqdm==4.67.1
+pyyaml==6.0.3
+

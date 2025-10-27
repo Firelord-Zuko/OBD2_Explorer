@@ -1,0 +1,165 @@
+[1A[1B[0G[?25l
+[?25h[1A[0G[?25l[+] Building 0.0s (0/1)                                    docker:desktop-linux
+[?25h[1A[0G[?25l[+] Building 0.2s (2/3)                                    docker:desktop-linux
+[36m => [internal] load build definition from Dockerfile                       0.0s
+[0m[36m => => transferring dockerfile: 3.08kB                                     0.0s
+[0m => [internal] load metadata for docker.io/library/python:3.10-slim        0.2s
+[36m => [auth] library/python:pull token for registry-1.docker.io              0.0s
+[0m[?25h[1A[1A[1A[1A[1A[0G[?25l[+] Building 0.4s (2/3)                                    docker:desktop-linux
+[36m => [internal] load build definition from Dockerfile                       0.0s
+[0m[36m => => transferring dockerfile: 3.08kB                                     0.0s
+[0m => [internal] load metadata for docker.io/library/python:3.10-slim        0.3s
+[36m => [auth] library/python:pull token for registry-1.docker.io              0.0s
+[0m[?25h[1A[1A[1A[1A[1A[0G[?25l[+] Building 0.4s (3/3)                                    docker:desktop-linux
+[36m => [internal] load build definition from Dockerfile                       0.0s
+[0m[36m => => transferring dockerfile: 3.08kB                                     0.0s
+[0m[36m => [internal] load metadata for docker.io/library/python:3.10-slim        0.4s
+[0m[36m => [auth] library/python:pull token for registry-1.docker.io              0.0s
+[0m[?25h[1A[1A[1A[1A[1A[0G[?25l[+] Building 0.6s (5/17)                                   docker:desktop-linux
+[36m => [internal] load metadata for docker.io/library/python:3.10-slim        0.4s
+[0m[36m => [auth] library/python:pull token for registry-1.docker.io              0.0s
+[0m[36m => [internal] load .dockerignore                                          0.0s
+[0m[36m => => transferring context: 415B                                          0.0s
+[0m[36m => [ 1/12] FROM docker.io/library/python:3.10-slim@sha256:e0c4fae70d5508  0.0s
+[0m[36m => => resolve docker.io/library/python:3.10-slim@sha256:e0c4fae70d550834  0.0s
+[0m => [internal] load build context                                          0.1s
+ => => transferring context: 1.52MB                                        0.1s
+[?25h[1A[1A[1A[1A[1A[1A[1A[1A[1A[0G[?25l[+] Building 0.7s (13/17)                                  docker:desktop-linux
+[36m => => transferring context: 2.54MB                                        0.2s
+[0m[36m => CACHED [ 2/12] WORKDIR /app                                            0.0s
+[0m[36m => CACHED [ 3/12] RUN apt-get update && apt-get install -y --no-install-  0.0s
+[0m[36m => CACHED [ 4/12] RUN python -m pip install --upgrade "pip==23.3.2" "set  0.0s
+[0m[36m => CACHED [ 5/12] RUN pip install --no-cache-dir     torch==2.3.1+cpu --  0.0s
+[0m[36m => CACHED [ 6/12] COPY requirements.txt /app/                             0.0s
+[0m[36m => CACHED [ 7/12] RUN pip install --no-cache-dir -r requirements.txt      0.0s
+[0m[36m => [ 8/12] COPY app.py /app/                                              0.1s
+[0m[?25h[1A[1A[1A[1A[1A[1A[1A[1A[1A[0G[?25l[+] Building 0.9s (15/17)                                  docker:desktop-linux
+[36m => CACHED [ 3/12] RUN apt-get update && apt-get install -y --no-install-  0.0s
+[0m[36m => CACHED [ 4/12] RUN python -m pip install --upgrade "pip==23.3.2" "set  0.0s
+[0m[36m => CACHED [ 5/12] RUN pip install --no-cache-dir     torch==2.3.1+cpu --  0.0s
+[0m[36m => CACHED [ 6/12] COPY requirements.txt /app/                             0.0s
+[0m[36m => CACHED [ 7/12] RUN pip install --no-cache-dir -r requirements.txt      0.0s
+[0m[36m => [ 8/12] COPY app.py /app/                                              0.1s
+[0m[36m => [ 9/12] COPY templates /app/templates                                  0.1s
+[0m[36m => [10/12] COPY static /app/static                                        0.1s
+[0m[?25h[1A[1A[1A[1A[1A[1A[1A[1A[1A[0G[?25l[+] Building 1.0s (16/17)                                  docker:desktop-linux
+[36m => CACHED [ 4/12] RUN python -m pip install --upgrade "pip==23.3.2" "set  0.0s
+[0m[36m => CACHED [ 5/12] RUN pip install --no-cache-dir     torch==2.3.1+cpu --  0.0s
+[0m[36m => CACHED [ 6/12] COPY requirements.txt /app/                             0.0s
+[0m[36m => CACHED [ 7/12] RUN pip install --no-cache-dir -r requirements.txt      0.0s
+[0m[36m => [ 8/12] COPY app.py /app/                                              0.1s
+[0m[36m => [ 9/12] COPY templates /app/templates                                  0.1s
+[0m[36m => [10/12] COPY static /app/static                                        0.1s
+[0m[36m => [11/12] COPY data /app/data                                            0.1s
+[0m[?25h[1A[1A[1A[1A[1A[1A[1A[1A[1A[0G[?25l[+] Building 1.2s (16/17)                                  docker:desktop-linux
+[36m => CACHED [ 5/12] RUN pip install --no-cache-dir     torch==2.3.1+cpu --  0.0s
+[0m[36m => CACHED [ 6/12] COPY requirements.txt /app/                             0.0s
+[0m[36m => CACHED [ 7/12] RUN pip install --no-cache-dir -r requirements.txt      0.0s
+[0m[36m => [ 8/12] COPY app.py /app/                                              0.1s
+[0m[36m => [ 9/12] COPY templates /app/templates                                  0.1s
+[0m[36m => [10/12] COPY static /app/static                                        0.1s
+[0m[36m => [11/12] COPY data /app/data                                            0.1s
+[0m => [12/12] RUN mkdir -p /app/models                                       0.1s
+[?25h[1A[1A[1A[1A[1A[1A[1A[1A[1A[0G[?25l[+] Building 1.3s (17/17)                                  docker:desktop-linux
+[36m => CACHED [ 5/12] RUN pip install --no-cache-dir     torch==2.3.1+cpu --  0.0s
+[0m[36m => CACHED [ 6/12] COPY requirements.txt /app/                             0.0s
+[0m[36m => CACHED [ 7/12] RUN pip install --no-cache-dir -r requirements.txt      0.0s
+[0m[36m => [ 8/12] COPY app.py /app/                                              0.1s
+[0m[36m => [ 9/12] COPY templates /app/templates                                  0.1s
+[0m[36m => [10/12] COPY static /app/static                                        0.1s
+[0m[36m => [11/12] COPY data /app/data                                            0.1s
+[0m[36m => [12/12] RUN mkdir -p /app/models                                       0.3s
+[0m[?25h[1A[1A[1A[1A[1A[1A[1A[1A[1A[0G[?25l[+] Building 1.5s (17/18)                                  docker:desktop-linux
+[36m => CACHED [ 7/12] RUN pip install --no-cache-dir -r requirements.txt      0.0s
+[0m[36m => [ 8/12] COPY app.py /app/                                              0.1s
+[0m[36m => [ 9/12] COPY templates /app/templates                                  0.1s
+[0m[36m => [10/12] COPY static /app/static                                        0.1s
+[0m[36m => [11/12] COPY data /app/data                                            0.1s
+[0m[36m => [12/12] RUN mkdir -p /app/models                                       0.3s
+[0m => exporting to image                                                     0.2s
+ => => exporting layers                                                    0.2s
+[?25h[1A[1A[1A[1A[1A[1A[1A[1A[1A[0G[?25l[+] Building 1.6s (17/18)                                  docker:desktop-linux
+[36m => CACHED [ 7/12] RUN pip install --no-cache-dir -r requirements.txt      0.0s
+[0m[36m => [ 8/12] COPY app.py /app/                                              0.1s
+[0m[36m => [ 9/12] COPY templates /app/templates                                  0.1s
+[0m[36m => [10/12] COPY static /app/static                                        0.1s
+[0m[36m => [11/12] COPY data /app/data                                            0.1s
+[0m[36m => [12/12] RUN mkdir -p /app/models                                       0.3s
+[0m => exporting to image                                                     0.3s
+ => => exporting layers                                                    0.3s
+[?25h[1A[1A[1A[1A[1A[1A[1A[1A[1A[0G[?25l[+] Building 1.8s (17/18)                                  docker:desktop-linux
+[36m => CACHED [ 7/12] RUN pip install --no-cache-dir -r requirements.txt      0.0s
+[0m[36m => [ 8/12] COPY app.py /app/                                              0.1s
+[0m[36m => [ 9/12] COPY templates /app/templates                                  0.1s
+[0m[36m => [10/12] COPY static /app/static                                        0.1s
+[0m[36m => [11/12] COPY data /app/data                                            0.1s
+[0m[36m => [12/12] RUN mkdir -p /app/models                                       0.3s
+[0m => exporting to image                                                     0.5s
+ => => exporting layers                                                    0.5s
+[?25h[1A[1A[1A[1A[1A[1A[1A[1A[1A[0G[?25l[+] Building 1.8s (17/18)                                  docker:desktop-linux
+[36m => CACHED [ 7/12] RUN pip install --no-cache-dir -r requirements.txt      0.0s
+[0m[36m => [ 8/12] COPY app.py /app/                                              0.1s
+[0m[36m => [ 9/12] COPY templates /app/templates                                  0.1s
+[0m[36m => [10/12] COPY static /app/static                                        0.1s
+[0m[36m => [11/12] COPY data /app/data                                            0.1s
+[0m[36m => [12/12] RUN mkdir -p /app/models                                       0.3s
+[0m => exporting to image                                                     0.5s
+[36m => => exporting layers                                                    0.5s
+[0m[?25h[1A[1A[1A[1A[1A[1A[1A[1A[1A[0G[?25l[+] Building 1.9s (17/18)                                  docker:desktop-linux
+[36m => [11/12] COPY data /app/data                                            0.1s
+[0m[36m => [12/12] RUN mkdir -p /app/models                                       0.3s
+[0m => exporting to image                                                     0.6s
+[36m => => exporting layers                                                    0.5s
+[0m[36m => => exporting manifest sha256:2a29e9160dc3d090bb81f2f4eda09a006fb9f1f8  0.0s
+[0m[36m => => exporting config sha256:a13829be325d6555504f89897351d1c75e7513e5d7  0.0s
+[0m[36m => => exporting attestation manifest sha256:da41e611b5261c769c249f197ac1  0.0s
+[0m => => exporting manifest list sha256:5e150b885edabdc96370067318b755eb970  0.0s
+[?25h[1A[1A[1A[1A[1A[1A[1A[1A[1A[0G[?25l[+] Building 2.1s (17/18)                                  docker:desktop-linux
+ => exporting to image                                                     0.8s
+[36m => => exporting layers                                                    0.5s
+[0m[36m => => exporting manifest sha256:2a29e9160dc3d090bb81f2f4eda09a006fb9f1f8  0.0s
+[0m[36m => => exporting config sha256:a13829be325d6555504f89897351d1c75e7513e5d7  0.0s
+[0m[36m => => exporting attestation manifest sha256:da41e611b5261c769c249f197ac1  0.0s
+[0m[36m => => exporting manifest list sha256:5e150b885edabdc96370067318b755eb970  0.0s
+[0m[36m => => naming to docker.io/library/obd2_explorer:latest                    0.0s
+[0m[36m => => unpacking to docker.io/library/obd2_explorer:latest                 0.1s
+[0m[?25h[1A[1A[1A[1A[1A[1A[1A[1A[1A[0G[?25l[+] Building 2.2s (18/18)                                  docker:desktop-linux
+[36m => exporting to image                                                     0.8s
+[0m[36m => => exporting layers                                                    0.5s
+[0m[36m => => exporting manifest sha256:2a29e9160dc3d090bb81f2f4eda09a006fb9f1f8  0.0s
+[0m[36m => => exporting config sha256:a13829be325d6555504f89897351d1c75e7513e5d7  0.0s
+[0m[36m => => exporting attestation manifest sha256:da41e611b5261c769c249f197ac1  0.0s
+[0m[36m => => exporting manifest list sha256:5e150b885edabdc96370067318b755eb970  0.0s
+[0m[36m => => naming to docker.io/library/obd2_explorer:latest                    0.0s
+[0m[36m => => unpacking to docker.io/library/obd2_explorer:latest                 0.1s
+[0m[?25h[1A[1A[1A[1A[1A[1A[1A[1A[1A[0G[?25l[+] Building 2.3s (18/18) FINISHED                         docker:desktop-linux
+[36m => [internal] load build definition from Dockerfile                       0.0s
+[0m[36m => => transferring dockerfile: 3.08kB                                     0.0s
+[0m[36m => [internal] load metadata for docker.io/library/python:3.10-slim        0.4s
+[0m[36m => [auth] library/python:pull token for registry-1.docker.io              0.0s
+[0m[36m => [internal] load .dockerignore                                          0.0s
+[0m[36m => => transferring context: 415B                                          0.0s
+[0m[36m => [ 1/12] FROM docker.io/library/python:3.10-slim@sha256:e0c4fae70d5508  0.0s
+[0m[36m => => resolve docker.io/library/python:3.10-slim@sha256:e0c4fae70d550834  0.0s
+[0m[36m => [internal] load build context                                          0.2s
+[0m[36m => => transferring context: 2.54MB                                        0.2s
+[0m[36m => CACHED [ 2/12] WORKDIR /app                                            0.0s
+[0m[36m => CACHED [ 3/12] RUN apt-get update && apt-get install -y --no-install-  0.0s
+[0m[36m => CACHED [ 4/12] RUN python -m pip install --upgrade "pip==23.3.2" "set  0.0s
+[0m[36m => CACHED [ 5/12] RUN pip install --no-cache-dir     torch==2.3.1+cpu --  0.0s
+[0m[36m => CACHED [ 6/12] COPY requirements.txt /app/                             0.0s
+[0m[36m => CACHED [ 7/12] RUN pip install --no-cache-dir -r requirements.txt      0.0s
+[0m[36m => [ 8/12] COPY app.py /app/                                              0.1s
+[0m[36m => [ 9/12] COPY templates /app/templates                                  0.1s
+[0m[36m => [10/12] COPY static /app/static                                        0.1s
+[0m[36m => [11/12] COPY data /app/data                                            0.1s
+[0m[36m => [12/12] RUN mkdir -p /app/models                                       0.3s
+[0m[36m => exporting to image                                                     0.8s
+[0m[36m => => exporting layers                                                    0.5s
+[0m[36m => => exporting manifest sha256:2a29e9160dc3d090bb81f2f4eda09a006fb9f1f8  0.0s
+[0m[36m => => exporting config sha256:a13829be325d6555504f89897351d1c75e7513e5d7  0.0s
+[0m[36m => => exporting attestation manifest sha256:da41e611b5261c769c249f197ac1  0.0s
+[0m[36m => => exporting manifest list sha256:5e150b885edabdc96370067318b755eb970  0.0s
+[0m[36m => => naming to docker.io/library/obd2_explorer:latest                    0.0s
+[0m[36m => => unpacking to docker.io/library/obd2_explorer:latest                 0.1s
+[0m[?25h

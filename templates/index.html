@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OBD-II Explorer</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Flask static stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+
+  <style>
+    body.light-mode { background-color: #f8f9fa; color: #212529; }
+    body.dark-mode { background-color: #121212; color: #e5e5e5; }
+
+    .dark-toggle {
+      position: fixed; top: 15px; right: 15px; z-index: 999;
+    }
+
+    .content {
+      background: var(--bs-body-bg);
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 5rem;
+    }
+
+    .history-pill {
+      display: inline-block;
+      background: #e9ecef;
+      color: #212529;
+      padding: 0.45rem 0.9rem;
+      border-radius: 20px;
+      margin: 0.25rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .history-pill:hover { background: #d1d5db; }
+    body.dark-mode .history-pill { background: #333; color: #eee; }
+    body.dark-mode .history-pill:hover { background: #444; }
+
+    #historyContainer {
+      display: flex;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      padding-bottom: 0.5rem;
+      scrollbar-width: thin;
+    }
+
+    .spinner-border { width: 2rem; height: 2rem; margin: 1rem auto; display: none; }
+
+    .forum-links a {
+      display: inline-block;
+      margin: 0.2rem 0.4rem;
+      text-decoration: none;
+    }
+    .forum-links a:hover { text-decoration: underline; }
+
+    .collapse-section {
+      cursor: pointer;
+      color: #0d6efd;
+      font-weight: 500;
+      user-select: none;
+      transition: color 0.3s;
+    }
+    .collapse-section:hover { color: #0a58ca; }
+
+    /* --- Mobile Toolbar --- */
+    .mobile-toolbar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff; border-top: 1px solid #ccc;
+      display: flex; justify-content: space-around; align-items: center;
+      padding: 0.6rem 0; z-index: 9999;
+    }
+    .mobile-toolbar button {
+      flex: 1; border: none; background: none;
+      font-size: 1.1rem; font-weight: 500; color: #0d6efd;
+    }
+    .mobile-toolbar button:active { transform: scale(0.96); }
+    body.dark-mode .mobile-toolbar { background: #1e1e1e; border-color: #444; }
+    body.dark-mode .mobile-toolbar button { color: #9bc9ff; }
+
+    @media (max-width: 768px) {
+      .content { padding: 1.2rem; }
+      .dark-toggle { top: auto; bottom: 4.5rem; right: 1rem; }
+    }
+  </style>
+</head>
+
+<body class="light-mode">
+  <button class="btn btn-outline-secondary dark-toggle" id="toggleDark">🌙 Dark Mode</button>
+
+  <div class="container my-4">
+    <div class="content">
+      <h1 class="text-center mb-3">🚗 OBD-II Explorer</h1>
+      <p class="text-center text-muted">
+        Enter an OBD-II code (e.g., P0301) to view details, DIY fixes, and helpful resources.
+      </p>
+
+      <div class="input-group mb-3">
+        <input type="text" id="codeInput" inputmode="text" pattern="[A-Za-z0-9]*"
+               class="form-control" placeholder="Enter code (P0001–P0394)" autofocus />
+        <button class="btn btn-primary" id="lookupBtn">Lookup</button>
+      </div>
+
+      <div class="text-center">
+        <div class="spinner-border text-primary" id="loadingSpinner" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <div id="result" style="display: none;">
+        <h5 id="codeTitle"></h5>
+        <p id="summary"></p>
+
+        <div id="fullDescription" style="display: none;">
+          <h6>Full Description:</h6>
+          <p id="description" class="text-secondary"></p>
+        </div>
+        <p class="collapse-section" id="toggleDesc" style="display: none;">Show full description ▼</p>
+
+        <h6 class="mt-3">🧰 DIY Recommendations:</h6>
+        <div id="recommendation"></div>
+        <p class="collapse-section" id="toggleTips" style="display: none;">View More Tips ▼</p>
+
+        <h6 class="mt-3">🔗 Forums & Resources:</h6>
+        <div class="forum-links" id="forums"></div>
+
+        <div id="recentHistorySection" class="mt-4">
+          <h6 class="collapse-section" id="toggleHistory">Recent Lookups ▼</h6>
+          <div id="historyContainer" style="display: none;"></div>
+        </div>
+
+        <p class="text-muted small mt-3" id="source"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🧭 Mobile Toolbar -->
+  <div class="mobile-toolbar">
+    <button id="toolbarLookup">🔍 Lookup Code</button>
+    <button id="toolbarClear">🗑️ Clear History</button>
+    <button id="toolbarDark">🌙 Dark Mode</button>
+  </div>
+
+  <script>
+    const body = document.body;
+    const toggleButton = document.getElementById("toggleDark");
+    const lookupBtn = document.getElementById("lookupBtn");
+    const spinner = document.getElementById("loadingSpinner");
+    const historyContainer = document.getElementById("historyContainer");
+    const toggleHistory = document.getElementById("toggleHistory");
+    const toolbarDark = document.getElementById("toolbarDark");
+    const toolbarClear = document.getElementById("toolbarClear");
+    const toolbarLookup = document.getElementById("toolbarLookup");
+
+    // Theme toggle
+    function toggleTheme() {
+      const dark = body.classList.contains("light-mode");
+      body.classList.toggle("dark-mode", dark);
+      body.classList.toggle("light-mode", !dark);
+      toggleButton.textContent = dark ? "☀️ Light Mode" : "🌙 Dark Mode";
+      toolbarDark.textContent = dark ? "☀️ Light" : "🌙 Dark";
+      localStorage.setItem("theme", dark ? "dark" : "light");
+    }
+    if (localStorage.getItem("theme") === "dark") toggleTheme();
+    toggleButton.addEventListener("click", toggleTheme);
+    toolbarDark.addEventListener("click", toggleTheme);
+
+    // --- Format recommendation text ---
+    function formatRecommendations(text) {
+      if (!text) return "<p>No recommendation available.</p>";
+      const lines = text.split(/\n|•|-|\d\.\s/).map(l => l.trim()).filter(Boolean);
+      if (lines.length <= 1) return `<p>${text}</p>`;
+      return "<ul>" + lines.map(l => `<li>${l}</li>`).join("") + "</ul>";
+    }
+
+    function setupTipsToggle(container, toggleButton) {
+      const listItems = container.querySelectorAll("li");
+      if (listItems.length > 4) {
+        for (let i = 3; i < listItems.length; i++) listItems[i].style.display = "none";
+        toggleButton.style.display = "block";
+        let expanded = false;
+        toggleButton.onclick = () => {
+          expanded = !expanded;
+          listItems.forEach((li, i) => { if (i >= 3) li.style.display = expanded ? "list-item" : "none"; });
+          toggleButton.textContent = expanded ? "Hide Extra Tips ▲" : "View More Tips ▼";
+        };
+      } else toggleButton.style.display = "none";
+    }
+
+    function renderForums(code) {
+      const forums = document.getElementById("forums");
+      const links = [
+        { name: "OBD-Codes", url: `https://www.obd-codes.com/${code.toLowerCase()}` },
+        { name: "ScannerDanner", url: `https://www.scannerdanner.com/forum` },
+        { name: "Reddit Mechanics", url: `https://www.reddit.com/r/MechanicAdvice/search/?q=${code}&restrict_sr=1` },
+        { name: "DTC-Search", url: `https://www.dtcsearch.com//${code}` },
+      ];
+      forums.innerHTML = links.map(l => `<a href="${l.url}" target="_blank">${l.name}</a>`).join(" | ");
+    }
+
+    function renderHistory() {
+      const history = JSON.parse(localStorage.getItem("lookupHistory") || "[]");
+      historyContainer.innerHTML = "";
+      if (!history.length) {
+        historyContainer.innerHTML = "<p class='text-muted small'>No recent lookups.</p>";
+        return;
+      }
+      const pills = history.map(code => `<span class="history-pill">${code}</span>`).join("");
+      historyContainer.innerHTML = pills;
+      document.querySelectorAll(".history-pill").forEach(pill => {
+        pill.onclick = () => {
+          document.getElementById("codeInput").value = pill.textContent;
+          performLookup();
+        };
+      });
+    }
+
+    toggleHistory.addEventListener("click", () => {
+      const hidden = historyContainer.style.display === "none";
+      historyContainer.style.display = hidden ? "flex" : "none";
+      toggleHistory.textContent = hidden ? "Recent Lookups ▲" : "Recent Lookups ▼";
+    });
+
+    // --- Poll for updated AI results ---
+    async function pollForUpdatedDIY(code, currentText, maxAttempts = 6, interval = 5000) {
+      let attempts = 0;
+      while (attempts < maxAttempts) {
+        await new Promise(res => setTimeout(res, interval));
+        try {
+          const response = await fetch("/lookup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code })
+          });
+          if (!response.ok) continue;
+          const data = await response.json();
+          const newText = data.recommendation || "";
+          if (newText && newText !== currentText && !newText.includes("Check for loose")) {
+            console.log("🔄 AI-updated DIY tips received!");
+            const recommendation = document.getElementById("recommendation");
+            recommendation.innerHTML = formatRecommendations(newText);
+            setupTipsToggle(recommendation, document.getElementById("toggleTips"));
+            break;
+          }
+        } catch (err) { console.warn("Polling failed:", err); }
+        attempts++;
+      }
+    }
+
+    async function performLookup() {
+      const code = document.getElementById("codeInput").value.trim().toUpperCase();
+      if (!code) return alert("Please enter a valid OBD-II code.");
+      lookupBtn.disabled = true;
+      spinner.style.display = "inline-block";
+      document.getElementById("result").style.display = "none";
+
+      try {
+        const res = await fetch("/lookup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code }),
+        });
+        const data = await res.json();
+        document.getElementById("result").style.display = "block";
+        document.getElementById("codeTitle").textContent = `Code: ${data.code}`;
+        document.getElementById("summary").textContent = data.summary || "No summary.";
+        document.getElementById("description").textContent = data.description || "No description.";
+        document.getElementById("recommendation").innerHTML = formatRecommendations(data.recommendation);
+        setupTipsToggle(document.getElementById("recommendation"), document.getElementById("toggleTips"));
+        renderForums(code);
+        renderHistory();
+        document.getElementById("source").textContent = `Source: ${data.source || "N/A"}`;
+        const fullDesc = document.getElementById("fullDescription");
+        const toggleDesc = document.getElementById("toggleDesc");
+        fullDesc.style.display = "none";
+        toggleDesc.style.display = data.description ? "block" : "none";
+        toggleDesc.onclick = () => {
+          const hidden = fullDesc.style.display === "none";
+          fullDesc.classList.toggle("fade-show", hidden);
+          fullDesc.style.display = hidden ? "block" : "none";
+          toggleDesc.textContent = hidden ? "Hide full description ▲" : "Show full description ▼";
+        };
+        const history = JSON.parse(localStorage.getItem("lookupHistory") || "[]");
+        if (!history.includes(code)) {
+          history.unshift(code);
+          if (history.length > 12) history.pop();
+          localStorage.setItem("lookupHistory", JSON.stringify(history));
+        }
+        pollForUpdatedDIY(code, data.recommendation); // 👈 new addition
+      } catch (err) {
+        alert("Lookup failed. Try again later.");
+        console.error(err);
+      } finally {
+        spinner.style.display = "none";
+        lookupBtn.disabled = false;
+      }
+    }
+
+    document.getElementById("lookupBtn").addEventListener("click", performLookup);
+    toolbarLookup.addEventListener("click", performLookup);
+    toolbarClear.addEventListener("click", () => { localStorage.removeItem("lookupHistory"); renderHistory(); });
+    document.getElementById("codeInput").addEventListener("keypress", e => { if (e.key === "Enter") performLookup(); });
+    renderHistory();
+  </script>
+</body>
+</html>
