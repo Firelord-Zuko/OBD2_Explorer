@@ -1,0 +1,66 @@
+# ===============================
+# 🧠 OBD-II Explorer Git Ignore
+# ===============================
+
+# Python bytecode and caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.pkl
+*.egg-info/
+.env
+.venv
+venv/
+env/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+.cache/
+.cache/*
+.cache/**
+
+# Local data and database backups
+data/backup_*.db
+*.sqlite
+*.sqlite3
+
+# Model files (do not push large GGUF files to GitHub)
+models/
+*.gguf
+*.bin
+*.pt
+*.pth
+
+# Docker artifacts
+*.tar
+*.pid
+*.sock
+docker-compose.override.yml
+.cache/
+.cache/**
+
+# Node / JS cache (in case future frontend builds use npm)
+node_modules/
+package-lock.json
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# VS Code / PyCharm IDE settings
+.vscode/
+.idea/
+
+# Compiled distributions
+dist/
+build/
+
+# Gunicorn / Flask instance
+instance/

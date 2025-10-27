@@ -1,0 +1,28 @@
+# ===============================
+# ⚙️ Git Attributes for OBD-II Explorer
+# ===============================
+
+# Auto detect text files and perform LF normalization
+* text=auto eol=lf
+
+# Treat these file types as text
+*.py text diff=python
+*.html text diff=html
+*.css text diff=css
+*.js text diff=javascript
+*.ps1 text diff=powershell
+*.md text diff=markdown
+*.txt text
+
+# Treat these file types as binary (no diff)
+*.db binary
+*.gguf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.exe binary
+*.zip binary
+
+# Handle line endings properly for PowerShell scripts (CRLF)
+*.ps1 text eol=crlf

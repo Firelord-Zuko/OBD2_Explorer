@@ -1,0 +1,56 @@
+[2025-10-27T02:18:01.459681+00:00] 🔍 Using database: C:/Users/switc/Projects/obd2_explorer/data/obd2_codes.db
+[2025-10-27T02:18:01.459917+00:00] 🧠 Loading TinyLlama model from: C:/Users/switc/Projects/obd2_explorer/models/tinyllama-1.1b-chat-v1.0.Q5_K_M.gguf
+[2025-10-27T02:18:01.535234+00:00] ✅ Model loaded successfully.
+
+[2025-10-27T02:18:01.540208+00:00] 🧩 Found 395 records missing DIY recommendations.
+
+[2025-10-27T02:18:05.821233+00:00] ✅ Updated up to record 0/395 (P0301)
+[2025-10-27T02:18:33.918384+00:00] ✅ Updated up to record 10/395 (P0008)
+[2025-10-27T02:19:59.131716+00:00] 🔍 Using database: C:/Users/switc/Projects/obd2_explorer/data/obd2_codes.db
+[2025-10-27T02:19:59.132324+00:00] 🧠 Loading TinyLlama model from: C:/Users/switc/Projects/obd2_explorer/models/tinyllama-1.1b-chat-v1.0.Q5_K_M.gguf
+[2025-10-27T02:19:59.209278+00:00] ✅ Model loaded successfully.
+
+[2025-10-27T02:19:59.213584+00:00] 🧩 Found 395 records missing DIY recommendations.
+
+[2025-10-27T02:20:03.448363+00:00] ✅ Updated up to record 0/395 (P0301)
+[2025-10-27T02:20:31.583909+00:00] ✅ Updated up to record 10/395 (P0008)
+[2025-10-27T02:21:07.547609+00:00] ✅ Updated up to record 20/395 (P0018)
+[2025-10-27T02:21:48.513798+00:00] ✅ Updated up to record 30/395 (P0028)
+[2025-10-27T02:22:31.406799+00:00] ✅ Updated up to record 40/395 (P0038)
+[2025-10-27T02:23:14.583572+00:00] ✅ Updated up to record 50/395 (P0048)
+[2025-10-27T02:23:56.587965+00:00] ✅ Updated up to record 60/395 (P0058)
+[2025-10-27T02:24:38.859641+00:00] ✅ Updated up to record 70/395 (P0068)
+[2025-10-27T02:25:21.308318+00:00] ✅ Updated up to record 80/395 (P0078)
+[2025-10-27T02:26:01.055334+00:00] ✅ Updated up to record 90/395 (P0088)
+[2025-10-27T02:26:42.325699+00:00] ✅ Updated up to record 100/395 (P0098)
+[2025-10-27T02:27:26.522383+00:00] ✅ Updated up to record 110/395 (P0108)
+[2025-10-27T02:28:08.817964+00:00] ✅ Updated up to record 120/395 (P0118)
+[2025-10-27T02:28:52.335780+00:00] ✅ Updated up to record 130/395 (P0128)
+[2025-10-27T02:29:36.684564+00:00] ✅ Updated up to record 140/395 (P0138)
+[2025-10-27T02:30:20.002435+00:00] ✅ Updated up to record 150/395 (P0148)
+[2025-10-27T02:31:03.077665+00:00] ✅ Updated up to record 160/395 (P0158)
+[2025-10-27T02:31:46.115124+00:00] ✅ Updated up to record 170/395 (P0168)
+[2025-10-27T02:32:30.813894+00:00] ✅ Updated up to record 180/395 (P0178)
+[2025-10-27T02:33:12.087716+00:00] ✅ Updated up to record 190/395 (P0188)
+[2025-10-27T02:33:55.626775+00:00] ✅ Updated up to record 200/395 (P0198)
+[2025-10-27T02:34:36.371116+00:00] ✅ Updated up to record 210/395 (P0208)
+[2025-10-27T02:35:09.619629+00:00] ✅ Updated up to record 220/395 (P0218)
+[2025-10-27T02:35:53.484775+00:00] ✅ Updated up to record 230/395 (P0228)
+[2025-10-27T02:36:37.266160+00:00] ✅ Updated up to record 240/395 (P0238)
+[2025-10-27T02:37:20.684041+00:00] ✅ Updated up to record 250/395 (P0248)
+[2025-10-27T02:38:04.258788+00:00] ✅ Updated up to record 260/395 (P0258)
+[2025-10-27T02:38:46.969067+00:00] ✅ Updated up to record 270/395 (P0268)
+[2025-10-27T02:39:29.326968+00:00] ✅ Updated up to record 280/395 (P0278)
+[2025-10-27T02:40:12.329646+00:00] ✅ Updated up to record 290/395 (P0288)
+[2025-10-27T02:40:55.242059+00:00] ✅ Updated up to record 300/395 (P0298)
+[2025-10-27T02:41:35.323300+00:00] ✅ Updated up to record 310/395 (P0309)
+[2025-10-27T02:42:15.121954+00:00] ✅ Updated up to record 320/395 (P0319)
+[2025-10-27T02:42:55.217903+00:00] ✅ Updated up to record 330/395 (P0329)
+[2025-10-27T02:43:40.297770+00:00] ✅ Updated up to record 340/395 (P0339)
+[2025-10-27T02:44:19.382525+00:00] ✅ Updated up to record 350/395 (P0349)
+[2025-10-27T02:45:04.699567+00:00] ✅ Updated up to record 360/395 (P0359)
+[2025-10-27T02:45:47.469083+00:00] ✅ Updated up to record 370/395 (P0370)
+[2025-10-27T02:46:32.151799+00:00] ✅ Updated up to record 380/395 (P0380)
+[2025-10-27T02:47:16.509495+00:00] ✅ Updated up to record 390/395 (P0390)
+[2025-10-27T02:47:31.773918+00:00] 
+✅ All missing DIY recommendations have been prepopulated successfully using TinyLlama AI.
