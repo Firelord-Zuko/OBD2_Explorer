@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>OBD-II Explorer v1.3.9</title>
+  <title>OBD-II Explorer v1.5.0</title>
 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -12,25 +12,37 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
 </head>
 
-<body class="light-mode">
-
+<body class="dark-mode">
   <div class="container my-4">
     <div class="content">
-      <h1 class="text-center mb-3">🚗 OBD-II Explorer v1.3.9</h1>
-      <p class="text-center instruction-text">
-        Enter an OBD-II code (P0000 to P0812) to view details, DIY fixes, and helpful resources.<br>
-        Codes missing a “P” or leading zeros will be automatically corrected.
+
+      <!-- Header -->
+      <div class="app-header mb-3">
+        <img src="{{ url_for('static', filename='images/obd_icon.png') }}" alt="OBD-II Icon" class="app-logo" />
+        <h1 class="app-title">OBD-II Explorer</h1>
+      </div>
+      <div class="header-accent"></div>
+
+      <p class="text-center instruction-text mt-3">
+        Enter an OBD-II code (e.g. P0030) to view details, DIY fixes, and helpful resources.
       </p>
 
-      <!-- ✅ Centered input -->
+      <!-- Input -->
       <div class="d-flex justify-content-center mb-3">
         <div class="input-wrapper">
-          <input type="text" id="codeInput" inputmode="text" pattern="[A-Za-z0-9]*"
-                 class="form-control text-center" placeholder="Enter code (P0001–P0812)" autofocus />
+          <input
+            type="text"
+            id="codeInput"
+            inputmode="text"
+            pattern="[A-Za-z0-9]*"
+            class="form-control text-center"
+            placeholder="Enter Code"
+            autofocus
+          />
         </div>
       </div>
 
-      <!-- ✅ Toolbar -->
+      <!-- Toolbar -->
       <div class="mobile-toolbar">
         <button id="toolbarLookup">🔍 Lookup</button>
         <button id="toolbarClear">🗑️ Clear</button>
@@ -43,6 +55,7 @@
         </div>
       </div>
 
+      <!-- Results -->
       <div id="result" style="display: none;">
         <h5 id="codeTitle" class="mt-3"></h5>
 
@@ -69,11 +82,13 @@
     </div>
   </div>
 
-  <footer class="text-center mt-4 mb-2 small text-muted">
-    <p>v1.3.9 | Sanford Janes Witcher III | Offline AI Diagnostics</p>
+  <footer class="text-center mt-4 mb-2 small text-muted"
+          title="Offline AI Diagnostics · v1.5.0 · Local Cache Enabled">
+    <p>v1.5.0 | Sanford Janes Witcher III | Offline AI Diagnostics</p>
   </footer>
 
   <script>
+    // ---------- DOM references ----------
     const body = document.body;
     const spinner = document.getElementById("loadingSpinner");
     const historyContainer = document.getElementById("historyContainer");
@@ -82,8 +97,32 @@
     const toolbarClear = document.getElementById("toolbarClear");
     const toolbarLookup = document.getElementById("toolbarLookup");
     const codeInput = document.getElementById("codeInput");
+    const resultEl = document.getElementById("result");
 
-    /* ---------- Utility: Normalize OBD-II Input ---------- */
+    // ---------- Theme handling ----------
+    function toggleTheme() {
+      const toDark = body.classList.contains("light-mode");
+      body.classList.toggle("dark-mode", toDark);
+      body.classList.toggle("light-mode", !toDark);
+      toolbarDark.textContent = toDark ? "☀️ Light" : "🌙 Dark";
+      localStorage.setItem("theme", toDark ? "dark" : "light");
+    }
+
+    // ✅ Default: use saved preference OR system preference
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      body.classList.remove("light-mode");
+      body.classList.add("dark-mode");
+      toolbarDark.textContent = "☀️ Light";
+    } else {
+      body.classList.remove("dark-mode");
+      body.classList.add("light-mode");
+      toolbarDark.textContent = "🌙 Dark";
+    }
+
+    toolbarDark.addEventListener("click", toggleTheme);
+
+    // ---------- Code normalization ----------
     function normalizeCodeInput(rawValue) {
       let code = rawValue.trim().toUpperCase();
       if (/^P\d{4}$/.test(code)) return code;
@@ -98,18 +137,7 @@
       alert(`Invalid format. Did you mean ${padded}?`);
     }
 
-    /* ---------- Theme Toggle ---------- */
-    function toggleTheme() {
-      const dark = body.classList.contains("light-mode");
-      body.classList.toggle("dark-mode", dark);
-      body.classList.toggle("light-mode", !dark);
-      toolbarDark.textContent = dark ? "☀️ Light" : "🌙 Dark";
-      localStorage.setItem("theme", dark ? "dark" : "light");
-    }
-    if (localStorage.getItem("theme") === "dark") toggleTheme();
-    toolbarDark.addEventListener("click", toggleTheme);
-
-    /* ---------- Format & Display ---------- */
+    // ---------- Formatting ----------
     function formatRecommendations(text) {
       if (!text) return "<p>No recommendation available.</p>";
       const lines = text.split(/\n|•|-|\d\.\s/).map(l => l.trim()).filter(Boolean);
@@ -142,6 +170,19 @@
       forums.innerHTML = links.map(l => `<a href="${l.url}" target="_blank">${l.name}</a>`).join(" | ");
     }
 
+    // ---------- Local cache ----------
+    function getCache() {
+      return JSON.parse(localStorage.getItem("lookupCache") || "{}");
+    }
+    function setCache(code, data) {
+      const cache = getCache();
+      cache[code] = { data, timestamp: Date.now() };
+      localStorage.setItem("lookupCache", JSON.stringify(cache));
+    }
+    function getCachedResult(code) {
+      const cache = getCache();
+      return cache[code] ? cache[code].data : null;
+    }
     function renderHistory() {
       const history = JSON.parse(localStorage.getItem("lookupHistory") || "[]");
       historyContainer.innerHTML = "";
@@ -165,23 +206,7 @@
       toggleHistory.textContent = hidden ? "🕘 Recent Lookups ▲" : "🕘 Recent Lookups ▼";
     });
 
-    /* ---------- Local Cache Functions ---------- */
-    function getCache() {
-      return JSON.parse(localStorage.getItem("lookupCache") || "{}");
-    }
-
-    function setCache(code, data) {
-      const cache = getCache();
-      cache[code] = { data, timestamp: Date.now() };
-      localStorage.setItem("lookupCache", JSON.stringify(cache));
-    }
-
-    function getCachedResult(code) {
-      const cache = getCache();
-      return cache[code] ? cache[code].data : null;
-    }
-
-    /* ---------- Main Lookup ---------- */
+    // ---------- Main Lookup ----------
     async function performLookup() {
       const normalizedCode = normalizeCodeInput(codeInput.value);
       codeInput.value = normalizedCode;
@@ -191,18 +216,19 @@
         return;
       }
 
-      // ⚡ Try cache first
+      // Save last code
+      localStorage.setItem("lastCode", normalizedCode);
+
       const cached = getCachedResult(normalizedCode);
       if (cached) {
-        console.log("Loaded from cache:", normalizedCode);
         renderResult(normalizedCode, cached, true);
         return;
       }
 
       spinner.style.display = "inline-block";
-      document.getElementById("result").style.display = "none";
+      resultEl.style.display = "none";
       toolbarLookup.disabled = true;
-      setTimeout(() => toolbarLookup.disabled = false, 800);
+      setTimeout(() => (toolbarLookup.disabled = false), 800);
 
       try {
         const res = await fetch("/lookup", {
@@ -213,7 +239,7 @@
         const data = await res.json();
 
         renderResult(normalizedCode, data, false);
-        setCache(normalizedCode, data); // ✅ cache new result
+        setCache(normalizedCode, data);
       } catch (err) {
         alert("Lookup failed. Try again later.");
         console.error(err);
@@ -223,9 +249,13 @@
       }
     }
 
-    /* ---------- Render Result Helper ---------- */
+    // ---------- Render Helper ----------
     function renderResult(code, data, fromCache) {
-      document.getElementById("result").style.display = "block";
+      resultEl.classList.remove("fade-in");
+      void resultEl.offsetWidth;
+      resultEl.classList.add("fade-in");
+
+      resultEl.style.display = "block";
       document.getElementById("codeTitle").textContent = `Code: ${data.code}`;
       document.getElementById("description").textContent = data.description || "No description.";
       document.getElementById("summary").textContent = data.summary || "No summary.";
@@ -258,14 +288,15 @@
         `<br><small>Last Checked: ${new Date().toLocaleString()}</small>`;
     }
 
+    // ---------- Enhancements ----------
+    codeInput.addEventListener("focus", e => e.target.select());
+    codeInput.addEventListener("keypress", e => { if (e.key === "Enter") performLookup(); });
     toolbarLookup.addEventListener("click", performLookup);
-    codeInput.addEventListener("keypress", e => {
-      if (e.key === "Enter") performLookup();
-    });
 
     toolbarClear.addEventListener("click", () => {
       localStorage.removeItem("lookupHistory");
       localStorage.removeItem("lookupCache");
+      localStorage.removeItem("lastCode");
       historyContainer.innerHTML = "<p class='text-muted small'>No recent lookups.</p>";
       codeInput.value = "";
       toolbarClear.disabled = true;
@@ -276,9 +307,19 @@
       }, 1000);
     });
 
-    codeInput.addEventListener("focus", e => e.target.select());
     spinner.style.display = "none";
     renderHistory();
+
+    const last = localStorage.getItem("lastCode");
+    if (last) {
+      codeInput.value = last;
+      const cached = getCachedResult(last);
+      if (cached) {
+        renderResult(last, cached, true);
+      } else {
+        performLookup();
+      }
+    }
   </script>
 </body>
 </html>

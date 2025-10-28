@@ -1,144 +1,84 @@
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
-![Flask](https://img.shields.io/badge/Framework-Flask-green)
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-blue)
-![LLM](https://img.shields.io/badge/AI_Model-TinyLlama_1.1B-orange)
-![Status](https://img.shields.io/badge/Status-Stable-success)
-
-# 🚗 OBD-II Explorer v1.4.0
+# 🚗 OBD-II Explorer v1.5.0
 
 ### Author
 **Sanford Janes Witcher III**  
-**Version:** v1.4.0  
-**Date:** October 27, 2025  
+**Version:** v1.5.0  
+**Date:** October 28, 2025  
+
+---
+
+## 🆕 New in v1.5.0
+- Default dark mode with OS preference detection  
+- Fade-in animation for diagnostic results  
+- Blue-accented section headers  
+- Unified layout spacing and typography  
+- Persistent last-code memory and input focus enhancements  
+- White footer override for dark mode  
+- Final stable release build
 
 ---
 
 ## 📘 Overview
-**OBD-II Explorer** is a self-hosted, offline-capable AI diagnostic web application that decodes automotive error codes using a local quantized LLM (TinyLlama GGUF).  
-It’s optimized for **speed, privacy, and offline operation**, providing instant summaries, code explanations, and DIY repair guidance through a lightweight **Flask** interface.
+**OBD-II Explorer** is a self-hosted, offline AI-powered diagnostic web app that decodes automotive error codes using a local quantized LLM (TinyLlama GGUF).  
+It’s optimized for **speed, privacy, and reliability**, delivering instant OBD-II definitions and AI repair suggestions without internet dependency.
 
 ---
 
-## 🧩 Project Structure
-```
-OBD-II_Explorer/
-├── app.py                        # Main Flask backend
-├── Dockerfile                    # Container build file
-├── requirements.txt              # Python dependencies
-├── README.md                     # Project documentation
-│
-├── data/
-│   └── obd2_codes.db             # SQLite database of OBD-II codes
-│
-├── models/
-│   └── tinyllama-1.1b-chat-v1.0.Q5_K_M.gguf   # Local quantized LLM
-│
-├── static/
-│   └── styles.css
-│
-└── templates/
-    └── index.html
-```
+## 🧠 Features
+- Lightweight local inference (Mistral / TinyLlama GGUF models)  
+- Instant OBD-II code lookup via offline SQLite RAG database  
+- Dark/light mode with remembered preference  
+- Intelligent formatting for AI-generated repair recommendations  
+- Persistent recent lookup history  
+- Full offline cache system for speed and redundancy  
 
 ---
 
-## ⚙️ Configuration
+## 🧰 Installation
+### Requirements
+- Python 3.10+  
+- Flask  
+- `llama-cpp-python`  
+- `sqlite3` database with enriched OBD-II codes
 
-### Environment Variables
-| Variable | Default | Description |
-|-----------|----------|-------------|
-| `DB_PATH` | `/app/data/obd2_codes.db` | SQLite database path |
-| `MODEL_PATH` | `/app/models/tinyllama-1.1b-chat-v1.0.Q5_K_M.gguf` | Local model file |
-| `CACHE_PATH` | `/app/cache` | Disk cache for AI outputs |
-
----
-
-## 🧠 Key Features
-
-### Backend (Flask + SQLite)
-- 🧩 **Automatic Schema Validation** — Ensures required columns exist.  
-- ⚙️ **SQLite WAL Mode** — Write-ahead logging for faster reads & concurrent access.  
-- 📇 **Auto-Index Creation** — Builds index on `code` column for instant lookups.  
-- ⚡ **In-Memory Cache (15 min)** — Caches recent lookups for zero-latency responses.  
-- 🧹 **Background Cleaner** — Removes expired cache entries hourly with live logging.  
-- 🤖 **Offline LLM Support** — Uses TinyLlama (GGUF, llama.cpp) for DIY suggestions.  
-
-### Front-End (HTML + JS)
-| Feature | Description |
-|----------|-------------|
-| 🔍 **Smart Code Normalization** | Automatically formats input (e.g., `23 → P0023`) |
-| ⚡ **Local Cache** | Saves prior results to browser `localStorage` |
-| 🧠 **Dark/Light Mode** | Persistent theme toggle |
-| 🕘 **History Section** | Displays 10 most recent lookups |
-| 📱 **Responsive Layout** | Scales perfectly for mobile and desktop |
-| 💬 **DIY Guidance** | AI-generated repair suggestions with confidence note |
-
----
-
-## ⚡ Performance Enhancements (v1.4.0)
-| Optimization | Description | Result |
-|---------------|-------------|--------|
-| WAL Mode | Enables concurrent reads & writes | +300–400% DB speed |
-| Cache Pragmas | Memory store, tuned page cache | Lower I/O load |
-| Auto Index | Instant lookups by code | <3 ms query time |
-| In-Memory LRU Cache | 15-minute RAM cache | Zero DB hits for repeats |
-| Auto Cleanup Thread | Hourly pruning & stats logging | No memory bloat |
-| DiskCache Layer | 7-day persistent AI cache | Fast fallback |
-
----
-
-## 🧱 Docker Setup
-
-### Build
+### Setup
 ```bash
-docker build -t obd2_explorer .
+git clone https://github.com/Firelord-Zuko/OBD2_Explorer.git
+cd OBD2_Explorer
+pip install -r requirements.txt
+python app.py
 ```
+Then open [http://localhost:8888](http://localhost:8888) in your browser.
 
-### Run
+---
+
+## 🧩 Docker Deployment (Synology / Container Manager)
+- Mount `/app` → your project folder  
+- Mount `/models` → local `.gguf` model directory  
+- Expose **port 8888**  
+- Run container with `--device /dev/kfd` and `--device /dev/dri` if GPU acceleration available.  
+
+---
+
+## 🧮 Local Model Example
 ```bash
-docker run -d -p 8888:8888 ^
-  -v "${PWD}/models:/app/models" ^
-  -v "${PWD}/data:/app/data" ^
-  --name obd2_explorer ^
-  obd2_explorer
+llama.cpp --model ./models/tinyllama-1.1b-chat-v1.0.Q5_K_M.gguf --port 8888
 ```
 
-**Access the app:**  
-🔗 [http://localhost:8888](http://localhost:8888)
+---
+
+## 📦 Data
+`data/obd2_codes.db` contains code definitions, causes, and repair recommendations.  
+You can enrich it manually or auto-merge with CSV imports using the included RAG preprocessor script.
 
 ---
 
-## 💾 Requirements
-- **Python 3.10+**
-- **Flask 3.0+**
-- **Docker Desktop** (Windows/Linux)
-- **8 GB RAM minimum** for local LLM inference
-- **Browser with localStorage support**
+## 🧾 License
+MIT License © 2025 Sanford Janes Witcher III
 
 ---
 
-## 🧡 Credits
-- **Author:** Sanford Janes Witcher III  
-- **Model:** TinyLlama 1.1B Chat (GGUF)  
-- **Backend:** Flask + SQLite + llama.cpp  
-- **Frontend:** Bootstrap 5 + Vanilla JS  
-
----
-
-## 🧭 Version History
-| Version | Date | Notes |
-|----------|------|-------|
-| **v1.4.0** | Oct 27 2025 | Added WAL, in-memory caching, auto index, cleanup thread |
-| **v1.3.9** | Oct 26 2025 | Local quick cache, dark mode updates |
-| **v1.3.0** | Oct 24 2025 | Stable base release |
-
----
-
-## 🏷️ License
-Licensed under the **MIT License** — free for personal and commercial use with attribution.
-
----
-
-## 🗕️ Last Updated
-**October 27, 2025**
+## ⚙️ Version History
+- **v1.5.0** – Stable release, dark mode default, UI refinements, persistent cache
+- **v1.4.0** – Added enriched code database and offline AI explanations
+- **v1.3.x** – Initial functional releases

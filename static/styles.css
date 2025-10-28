@@ -1,31 +1,117 @@
+/* ---------- Base ---------- */
 body {
   font-family: "Segoe UI", Tahoma, sans-serif;
+  font-size: 0.97rem;
+  line-height: 1.6;
   margin-bottom: 80px;
   transition: background 0.8s ease, color 0.8s ease;
 }
 
+/* ---------- Light Mode Background (banding-free) ---------- */
 body.light-mode {
   background: linear-gradient(135deg, rgb(173, 216, 255), rgb(43, 151, 251));
   color: #212529;
 }
 
+/* Subtle dithering overlay for ultra-smooth gradient */
+body.light-mode::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.015) 0px,
+    rgba(0, 0, 0, 0.015) 1px,
+    transparent 2px
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.2;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ---------- Dark Mode ---------- */
 body.dark-mode {
   background-color: #121212;
   color: #e5e5e5;
+}
+
+/* ---------- Header ---------- */
+.app-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.app-logo {
+  width: 72px;
+  height: auto;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.app-logo:hover {
+  transform: scale(1.08);
+  filter: drop-shadow(0 0 6px rgba(0, 191, 255, 0.5));
+}
+
+.app-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin: 0;
+  color: inherit;
+  letter-spacing: 0.5px;
+}
+
+/* Accent line under header */
+.header-accent {
+  height: 3px;
+  width: 200px;
+  margin: 0.3rem auto 1rem;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #2b97fb, #00b7ff);
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
+  position: relative;
+}
+
+.header-accent::after {
+  content: "";
+  display: block;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-top: 2px;
+}
+
+body.dark-mode .header-accent {
+  background: linear-gradient(90deg, #67b6ff, #00cfff);
+  opacity: 1;
 }
 
 /* ---------- Card ---------- */
 .content {
   background: rgba(255, 255, 255, 0.93);
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   padding: 2rem;
   margin-bottom: 5rem;
-  transition: background-color 0.4s ease, color 0.4s ease;
+  transition: background-color 0.4s ease, color 0.4s ease, box-shadow 0.3s ease;
+}
+
+/* nice fade-in when results update */
+.fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 body.dark-mode .content {
   background: rgba(30, 30, 30, 0.95);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
 }
 
 /* ---------- Narrow Input ---------- */
@@ -38,6 +124,34 @@ body.dark-mode .content {
 .form-control {
   border-radius: 0.5rem;
   text-align: center;
+  color: #000;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  transition: all 0.25s ease;
+}
+
+/* Dark mode input */
+body.dark-mode .form-control {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border: 1px solid #444;
+}
+
+/* Placeholder colors */
+.form-control::placeholder {
+  color: rgba(0, 0, 0, 0.4);
+  font-weight: 400;
+}
+body.dark-mode .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+}
+
+/* Focus glow */
+.form-control:focus {
+  outline: none;
+  border-color: #00bfff;
+  box-shadow: 0 0 6px rgba(0, 191, 255, 0.4);
 }
 
 /* ---------- Toolbar ---------- */
@@ -60,7 +174,14 @@ body.dark-mode .content {
   padding: 0.5rem 0.9rem;
   border-radius: 10px;
   min-width: 96px;
-  transition: transform 0.06s ease, background-color 0.2s ease, opacity 0.3s ease;
+  min-height: 40px;           /* consistent button height */
+  transition: all 0.25s ease;
+}
+
+.mobile-toolbar button:hover {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
 }
 
 .mobile-toolbar button:active { transform: scale(0.98); }
@@ -70,6 +191,11 @@ body.dark-mode .mobile-toolbar button {
   color: #fff;
   border-color: #444;
 }
+body.dark-mode .mobile-toolbar button:hover {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
 
 /* ---------- Section Icons ---------- */
 .section-icon {
@@ -77,15 +203,31 @@ body.dark-mode .mobile-toolbar button {
   align-items: center;
   gap: 0.4rem;
   font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #009dff;             /* subtle blue accent */
+}
+body.dark-mode .section-icon {
+  color: #80c9ff;
 }
 
-/* ---------- Summary Text Fix ---------- */
-.summary-text {
-  color: #212529;
+/* Align all section content */
+#summary,
+#description,
+#recommendation,
+.forum-links,
+#metaInfo,
+#historyContainer {
+  margin-left: 1.8rem;
 }
-body.dark-mode .summary-text {
-  color: #d9e9ff; /* lighter for visibility */
+
+/* Tighter spacing after section headers */
+.section-icon + * {
+  margin-top: 0.25rem;
 }
+
+/* Summary text color balance */
+.summary-text { color: #212529; }
+body.dark-mode .summary-text { color: #d9e9ff; }
 
 /* ---------- History Pills ---------- */
 .history-pill {
@@ -95,16 +237,34 @@ body.dark-mode .summary-text {
   border-radius: 20px;
   margin: 0.25rem;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.1s ease;
 }
-
-.history-pill:hover { background: #d1d5db; }
-
+.history-pill:hover {
+  background: #d1d5db;
+  transform: scale(1.05);
+}
 body.dark-mode .history-pill { background: #333; color: #eee; }
 body.dark-mode .history-pill:hover { background: #444; }
 
+/* ---------- Forum Links ---------- */
+.forum-links a {
+  color: #2b97fb;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.forum-links a:hover {
+  color: #00bfff;
+  text-decoration: underline;
+}
+
+/* ---------- Recent Lookups spacing ---------- */
+#historyContainer { margin-top: 0.6rem; }
+#historyContainer .history-pill { margin-top: 0.3rem; }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 576px) {
+  .app-title { font-size: 1.6rem; }
+  .app-logo { width: 56px; }
   .content { padding: 1.25rem; }
   .input-wrapper { width: 75%; }
 }
@@ -114,7 +274,12 @@ footer {
   text-align: center;
   margin-top: 2rem;
   font-size: 0.85rem;
-  opacity: 0.8;
+  opacity: 0.9;
 }
-
-body.dark-mode footer { color: #aaa; }
+/* force white footer in dark mode (override Bootstrap .text-muted) */
+body.dark-mode footer,
+body.dark-mode footer p,
+body.dark-mode .text-muted {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
