@@ -12,10 +12,13 @@ import os
 import re
 import random
 import sqlite3
+import threading
+import time
 from datetime import datetime, timedelta
 from flask import Flask, request, jsonify, render_template
 from textwrap import shorten
 from diskcache import Cache
+from functools import lru_cache
 from llama_cpp import Llama
 
 # ---------------------------
@@ -39,6 +42,8 @@ CONFIDENCE_NOTE = (
     "and consult a professional if uncertain."
 )
 REFRESH_DAYS = 30
+MEM_CACHE_TTL = 900   # 15 minutes
+CACHE_CLEAN_INTERVAL = 3600  # 1 hour
 
 # ---------------------------
 # Initialize Cache
@@ -67,9 +72,27 @@ def load_llm():
 # ---------------------------
 # Database Helpers
 # ---------------------------
+def tune_sqlite_connection(conn):
+    """Apply SQLite performance settings."""
+    pragmas = [
+        ("journal_mode", "WAL"),
+        ("synchronous", "NORMAL"),
+        ("temp_store", "MEMORY"),
+        ("cache_size", -16000),  # ~16MB cache
+        ("locking_mode", "NORMAL")
+    ]
+    cur = conn.cursor()
+    for k, v in pragmas:
+        try:
+            cur.execute(f"PRAGMA {k}={v};")
+        except Exception as e:
+            print(f"⚠️ Skipped PRAGMA {k}: {e}")
+    conn.commit()
+
 def get_db():
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     conn.row_factory = sqlite3.Row
+    tune_sqlite_connection(conn)
     return conn
 
 def ensure_columns():
@@ -86,6 +109,13 @@ def ensure_columns():
         if col not in existing:
             cur.execute(f"ALTER TABLE obd_codes ADD COLUMN {col} TEXT;")
             print(f"✅ Added column: {col}")
+    # ✅ Ensure index on code for fast lookups
+    try:
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_code ON obd_codes(code);")
+        conn.commit()
+        print("✅ Index ensured: idx_code on obd_codes(code)")
+    except Exception as e:
+        print(f"⚠️ Index creation skipped: {e}")
     conn.commit()
     conn.close()
 
@@ -107,6 +137,37 @@ FALLBACK_POOL = [
     "Test sensor output voltage or resistance values",
     "Inspect the condition of the vehicle's windshield wipers and washer system",
 ]
+
+# ---------------------------
+# Memory Cache for Recent Lookups
+# ---------------------------
+_mem_cache = {}
+
+def get_from_mem_cache(code):
+    entry = _mem_cache.get(code)
+    if entry:
+        value, ts = entry
+        if time.time() - ts < MEM_CACHE_TTL:
+            return value
+        else:
+            del _mem_cache[code]
+    return None
+
+def set_mem_cache(code, value):
+    _mem_cache[code] = (value, time.time())
+
+def clean_mem_cache():
+    """Periodically purge expired entries and log cache stats."""
+    while True:
+        now = time.time()
+        expired = [k for k, (_, ts) in _mem_cache.items() if now - ts > MEM_CACHE_TTL]
+        for k in expired:
+            del _mem_cache[k]
+        print(f"🧠 Memory cache cleaned — Active entries: {len(_mem_cache)}")
+        time.sleep(CACHE_CLEAN_INTERVAL)
+
+# Start background thread for auto-cleanup
+threading.Thread(target=clean_mem_cache, daemon=True).start()
 
 # ---------------------------
 # AI Selection Logic (llama.cpp)
@@ -180,6 +241,12 @@ def lookup():
     if not code:
         return jsonify({"error": "No code provided."}), 400
 
+    # ⚡ Try memory cache first
+    cached_result = get_from_mem_cache(code)
+    if cached_result:
+        print(f"⚡ Memory cache hit for {code}")
+        return jsonify(cached_result)
+
     conn = get_db()
     cur = conn.cursor()
     cur.execute("""
@@ -191,14 +258,16 @@ def lookup():
 
     if not row:
         conn.close()
-        return jsonify({
+        result = {
             "code": code,
             "summary": "Code not found.",
             "description": "No data available.",
             "recommendation": "• Try another OBD II code.",
             "source": "N/A",
             "ai_last_updated": None
-        }), 404
+        }
+        set_mem_cache(code, result)
+        return jsonify(result), 404
 
     description = row["description"]
     summary = row["summary"] or summarize_text(description)
@@ -223,14 +292,19 @@ def lookup():
         diy_output = diy_checks if CONFIDENCE_NOTE in diy_checks else diy_checks + CONFIDENCE_NOTE
 
     conn.close()
-    return jsonify({
+
+    result = {
         "code": row["code"],
         "summary": summary,
         "description": description,
         "recommendation": diy_output.strip(),
         "source": row["source"] or "OBD-Codes.com",
         "ai_last_updated": ai_last_updated or datetime.utcnow().isoformat()
-    })
+    }
+
+    # ✅ Cache result in memory for 15 min
+    set_mem_cache(code, result)
+    return jsonify(result)
 
 @app.errorhandler(Exception)
 def handle_exception(e):
